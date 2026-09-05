@@ -1,0 +1,117 @@
+/* CareLink Modern Startup Design System */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+    --brand-primary: #0d9488;
+    --brand-dark: #0f172a;
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+    letter-spacing: -0.015em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Minimalist Scrollbars */
+::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Smooth Interactive Cards */
+.startup-card {
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.startup-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px -8px rgba(15, 23, 42, 0.08);
+}
+
+/* Glassmorphism Surface */
+.glass-surface {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+/* Animations */
+.fade-in {
+    animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Dispatcher Live GPS Route Animation */
+@keyframes flowDash {
+    to {
+        stroke-dashoffset: -28;
+    }
+}
+
+.leaflet-active-route-path {
+    animation: flowDash 1.2s linear infinite;
+}
+
+/* Realistic Roadway / Highway styling on Leaflet Map */
+.leaflet-road-casing {
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.leaflet-road-asphalt {
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.leaflet-road-centerline {
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+
+@keyframes beaconPulse {
+    0% {
+        transform: scale(0.9);
+        opacity: 0.9;
+    }
+    70% {
+        transform: scale(2.2);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(2.4);
+        opacity: 0;
+    }
+}
+
+.radar-pulse-ring {
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    pointer-events: none;
+    animation: beaconPulse 2s ease-out infinite;
+}
+
