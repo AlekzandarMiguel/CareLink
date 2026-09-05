@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CareLink — Modern Hospital Referral & Coordination Cloud{% endblock %}</title>
+    
+    <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- CareLink Favicon -->
+    <link rel="icon" type="image/png" href="/static/img/carelink-logo.png">
+    <link rel="apple-touch-icon" href="/static/img/carelink-logo.png">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace']
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0fdf9',
+                            100: '#ccfbf1',
+                            200: '#99f6e4',
+                            300: '#5eead4',
+                            400: '#2dd4bf',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                            950: '#042f2e'
+                        },
+                        primary: {
+                            50: '#f0fdf9',
+                            100: '#ccfbf1',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body class="h-full flex flex-col font-sans text-slate-800 antialiased bg-slate-50 selection:bg-brand-500 selection:text-white">
+    {% block header %}
+    <!-- Top Modern Startup Header -->
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/90 transition shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
+        <div class="w-full px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16 gap-4">
+                <!-- Brand Identity & Mobile Toggle -->
+                <div class="flex items-center gap-3 lg:w-64 lg:flex-shrink-0">
+                    <button id="sidebar-toggle-btn" onclick="toggleSidebar()" class="p-2 -ml-2 rounded-xl text-slate-600 hover:bg-slate-100 lg:hidden cursor-pointer" aria-label="Toggle Navigation">
+                        <i class="fa-solid fa-bars text-lg"></i>
+                    </button>
+                    <a href="/" id="brand-logo-link" class="flex items-center gap-3 group">
+                        <img src="/static/img/carelink-logo.png" alt="CareLink Logo" class="h-10 w-auto object-contain shrink-0 group-hover:scale-105 transition-transform duration-200">
+                        <div class="flex flex-col justify-center">
+                            <span class="text-xl font-black tracking-tight text-slate-900 leading-tight">Care<span class="text-teal-600">Link</span></span>
+                            <span class="text-[11px] font-medium text-slate-500 hidden sm:flex items-center gap-1.5 tracking-tight -mt-0.5">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                <span>Patient Referral System</span>
+                            </span>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Center Contextual Workspace Breadcrumb -->
+                <div id="topbar-context" class="hidden md:flex flex-1 items-center gap-3 text-xs pl-4 border-l border-slate-200/80">
+                    <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-100/80 border border-slate-200/60 font-medium text-slate-700 max-w-xs xl:max-w-sm truncate shadow-2xs">
+                        <i class="fa-solid fa-hospital text-brand-600 text-[11px] shrink-0"></i>
+                        <span id="topbar-facility-name" class="truncate font-semibold text-slate-800" title="Active Healthcare Facility">CareLink Platform</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-slate-500 font-medium">Workspace:</span>
+                        <span id="topbar-current-page" class="font-bold text-slate-900">Workspace</span>
+                    </div>
+                    <button id="topbar-live-indicator" onclick="triggerManualSync()" class="inline-flex items-center gap-1.5 ml-auto lg:ml-3 text-[11px] font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200/80 px-2.5 py-1 rounded-full cursor-pointer transition shadow-2xs group" title="Real-Time Auto-Update Active • Click to Force Sync Now">
+                        <span class="relative flex h-2 w-2">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        </span>
+                        <span id="topbar-live-text" class="font-bold">Live Auto-Update</span>
+                        <i id="topbar-live-icon" class="fa-solid fa-arrows-rotate text-[10px] text-emerald-600 group-hover:rotate-180 transition-transform duration-300"></i>
+                    </button>
+                </div>
+
+                <!-- Right: Auth / Profile Controls -->
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <div id="unauth-controls" class="flex items-center gap-2">
+                        <a href="/login/" class="px-4 py-2 text-sm font-semibold text-slate-700 hover:text-brand-700 hover:bg-slate-100 rounded-xl transition">
+                            Sign In
+                        </a>
+                        <a href="/register-hospital/" class="px-4 py-2 text-sm font-bold text-white bg-slate-900 hover:bg-brand-600 rounded-xl shadow-sm hover:shadow transition-all duration-200 flex items-center gap-1.5">
+                            <span>Join Network</span>
+                            <i class="fa-solid fa-arrow-right text-xs"></i>
+                        </a>
+                    </div>
+
+                    <div id="auth-controls" class="hidden flex items-center gap-2 sm:gap-3">
+                        <!-- Notifications Button & Flyout -->
+                        <div class="relative">
+                            <button id="notif-btn" onclick="toggleNotifDropdown()" class="relative p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition cursor-pointer border border-transparent hover:border-slate-200" aria-label="Notifications">
+                                <i class="fa-regular fa-bell text-lg"></i>
+                                <span id="notif-badge" class="hidden absolute top-1.5 right-1.5 flex h-4 min-w-[16px] px-1 items-center justify-center bg-rose-500 text-[10px] font-black text-white rounded-full ring-2 ring-white">0</span>
+                            </button>
+                            <div id="notif-dropdown" class="hidden absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                                <div class="px-4 py-2.5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 rounded-t-2xl">
+                                    <div class="flex items-center gap-2">
+                                        <i class="fa-solid fa-bell text-brand-600 text-xs"></i>
+                                        <h4 class="text-sm font-bold text-slate-900">Activity Notifications</h4>
+                                    </div>
+                                    <button onclick="markAllNotificationsRead()" class="text-xs font-semibold text-brand-600 hover:text-brand-800 transition">Mark all read</button>
+                                </div>
+                                <div id="notif-list" class="max-h-80 overflow-y-auto divide-y divide-slate-100 text-xs">
+                                    <p class="text-center py-6 text-slate-400">No new notifications</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- User Profile Pill & Dropdown -->
+                        <div class="flex items-center gap-2 pl-2 border-l border-slate-200">
+                            <div class="text-right hidden sm:block">
+                                <p id="nav-user-name" class="text-xs font-bold text-slate-900 leading-tight">Loading...</p>
+                                <div class="mt-0.5 flex justify-end">
+                                    <span id="nav-user-role-badge" class="inline-flex items-center text-[10px] font-bold px-2 py-0.2 rounded-md bg-brand-50 text-brand-700 border border-brand-200/60 leading-tight">
+                                        <span id="nav-user-role">Role</span>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="dropdown relative">
+                                <button onclick="toggleUserDropdown()" id="user-menu-btn" class="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 border border-slate-200 flex items-center justify-center text-slate-700 hover:border-brand-500 hover:shadow-sm transition cursor-pointer group" aria-label="User Menu">
+                                    <span id="nav-user-avatar-initials" class="text-xs font-extrabold text-brand-700 group-hover:scale-105 transition-transform">CL</span>
+                                </button>
+                                <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-slate-200 py-2 z-50 text-sm animate-in fade-in slide-in-from-top-2 duration-150">
+                                    <div class="px-4 py-3 border-b border-slate-100 bg-slate-50/60 rounded-t-2xl">
+                                        <div class="flex items-center gap-3">
+                                            <div id="dd-avatar-badge" class="w-10 h-10 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center font-bold text-sm border border-brand-200/80 shrink-0">
+                                                <span id="dd-user-initials">CL</span>
+                                            </div>
+                                            <div class="min-w-0 flex-1">
+                                                <p class="font-bold text-slate-900 truncate text-sm" id="dd-user-name">User Name</p>
+                                                <p class="text-xs text-slate-500 truncate" id="dd-user-hospital">Hospital Name</p>
+                                            </div>
+                                        </div>
+                                        <div class="mt-2.5 flex items-center justify-between">
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wide" id="dd-user-role-badge">
+                                                <span id="dd-user-role">STAFF</span>
+                                            </span>
+                                            <span class="text-[10px] text-slate-400 font-medium">CareLink ID Verified</span>
+                                        </div>
+                                    </div>
+                                    <div class="py-1 text-xs divide-y divide-slate-50">
+                                        <div class="py-1">
+                                            <a id="dd-dashboard-link" href="/staff-dashboard/" class="flex items-center gap-2.5 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50 hover:text-brand-700 transition">
+                                                <i class="fa-solid fa-gauge-high text-brand-600 w-4 text-center"></i>
+                                                <span>Primary Dashboard</span>
+                                            </a>
+                                            <a id="dd-settings-link" href="/staff/settings/" class="flex items-center gap-2.5 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50 hover:text-brand-700 transition">
+                                                <i class="fa-solid fa-gear text-slate-500 w-4 text-center"></i>
+                                                <span>Account & Security Settings</span>
+                                            </a>
+                                            <a href="/hospital-search/" class="flex items-center gap-2.5 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50 hover:text-teal-700 transition">
+                                                <i class="fa-solid fa-hospital text-teal-600 w-4 text-center"></i>
+                                                <span>Hospital Directory & Network</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="border-t border-slate-100 pt-1 mt-1 px-2">
+                                        <button onclick="handleLogout()" class="w-full text-left px-3 py-2 text-rose-600 hover:bg-rose-50 rounded-xl text-xs font-bold flex items-center gap-2.5 transition cursor-pointer">
+                                            <i class="fa-solid fa-arrow-right-from-bracket w-4 text-center"></i>
+                                            <span>Sign Out Securely</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    {% endblock %}
+
+    <!-- Main App Wrapper -->
+    <div class="flex-1 flex overflow-hidden">
+        <!-- Sidebar Navigation (Authenticated Roles) -->
+        <aside id="app-sidebar" class="hidden w-64 bg-white border-r border-slate-200 flex-col flex-shrink-0 transition-all duration-300">
+            <!-- Navigation Links -->
+            <div class="flex-1 overflow-y-auto px-3 py-4 space-y-5">
+                <div>
+                    <p class="px-3 text-[10px] font-black uppercase tracking-wider text-slate-400 mb-2" id="sb-nav-section-title">Navigation</p>
+                    <nav class="space-y-1 text-xs font-semibold" id="sb-nav-links">
+                        <!-- Populated by app.js -->
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Sidebar Footer: Dedicated Sign Out -->
+            <div class="p-3 border-t border-slate-200">
+                <button onclick="handleLogout()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-rose-50 hover:text-rose-600 transition group cursor-pointer" title="Sign Out">
+                    <i class="fa-solid fa-arrow-right-from-bracket w-4 text-center text-slate-400 group-hover:text-rose-600 transition"></i>
+                    <span>Sign Out</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 overflow-y-auto bg-slate-50/80">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    {% block footer %}
+    <!-- Clean Minimal Footer -->
+    <footer class="bg-white border-t border-slate-200 py-3.5 px-6 text-xs text-slate-400">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
+            <div class="flex items-center gap-2.5 text-slate-600 font-semibold">
+                <img src="/static/img/carelink-logo.png" alt="CareLink Logo" class="h-5 w-auto object-contain shrink-0">
+                <span>Care<span class="text-teal-600">Link</span></span>
+                <span class="text-slate-400 font-normal">&bull; Healthcare Patient Referral & Coordination System</span>
+            </div>
+            <span class="inline-flex items-center gap-1.5 text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full text-[11px] font-bold border border-emerald-200/60">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Telemetry Connected
+            </span>
+        </div>
+    </footer>
+    {% endblock %}
+
+    <!-- HIPAA Inactivity Warning Modal -->
+    <div id="inactivity-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-200 text-center space-y-5">
+            <div class="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-2xl mx-auto border border-amber-200">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+            </div>
+            <div class="space-y-2">
+                <h3 class="text-lg font-bold text-slate-900">Session Inactivity Warning</h3>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                    Under HIPAA security and patient data privacy guidelines, your session will automatically terminate due to inactivity in:
+                </p>
+                <div class="py-2">
+                    <span id="inactivity-countdown" class="font-mono text-3xl font-extrabold text-amber-600 bg-amber-50 px-4 py-1.5 rounded-xl border border-amber-200">
+                        02:00
+                    </span>
+                </div>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button onclick="extendSession()" class="flex-1 px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 transition shadow-sm cursor-pointer">
+                    <i class="fa-solid fa-lock-open mr-1"></i> Stay Signed In
+                </button>
+                <button onclick="handleLogout()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-rose-50 hover:text-rose-600 transition cursor-pointer">
+                    Sign Out Now
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/charts.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}Hospital Approvals & Network — CareLink{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-5">
+        <div>
+            <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider">Hospital Network</span>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-0.5">Hospital Approvals & Network</h1>
+            <p class="text-xs text-slate-500 mt-1">Review onboarding applications, license verification, and facility activation</p>
+        </div>
+        <div class="flex gap-2">
+            <a href="/register-hospital/" class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-primary-600 hover:bg-primary-700 transition shadow-sm flex items-center gap-1.5">
+                <i class="fa-solid fa-plus"></i> Register Facility
+            </a>
+            <button onclick="refreshAdminApprovals(this)" class="px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition shadow-sm flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-solid fa-rotate text-primary-600"></i> Refresh
+            </button>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-4 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+            <h3 class="font-bold text-slate-900 text-sm">Registered Facilities (<span id="admin-hosp-count">0</span>)</h3>
+            <span class="text-xs text-slate-500">Verification & Operational Approvals</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 text-slate-600 text-xs uppercase font-semibold border-b border-slate-100">
+                    <tr>
+                        <th class="px-6 py-3.5">Hospital Name</th>
+                        <th class="px-6 py-3.5">Location</th>
+                        <th class="px-6 py-3.5">Capacity</th>
+                        <th class="px-6 py-3.5">Status</th>
+                        <th class="px-6 py-3.5 text-right">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-hospital-tbody" class="divide-y divide-slate-100">
+                    <tr><td colspan="5" class="px-6 py-8 text-center text-slate-400">Loading hospitals...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        requireRole('ADMIN');
+        loadAdminDashboardData();
+    });
+</script>
+{% endblock %}

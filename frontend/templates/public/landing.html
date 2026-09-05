@@ -1,0 +1,425 @@
+{% extends 'base.html' %}
+{% block title %}CareLink — Inter-Hospital Patient Referral & Capacity Management Platform{% endblock %}
+
+{% block header %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<!-- Auto-redirect if already signed in -->
+<script>
+    (function() {
+        try {
+            const raw = localStorage.getItem('carelink_user');
+            if (raw) {
+                const u = JSON.parse(raw);
+                if (u && u.role) {
+                    let d = '/staff-dashboard/';
+                    if (u.role === 'ADMIN') d = '/admin-dashboard/';
+                    else if (u.role === 'COORDINATOR') d = '/coordinator-dashboard/';
+                    else if (u.role === 'DISPATCHER') d = '/dispatcher-dashboard/';
+                    window.location.replace(d);
+                }
+            }
+        } catch(e) {}
+    })();
+</script>
+
+<div class="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans antialiased selection:bg-teal-600 selection:text-white">
+
+    <!-- Top Public Navigation (Clean, Badge-Free) -->
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20 gap-4">
+                <!-- Brand Lockup -->
+                <a href="/" class="flex items-center gap-3 group">
+                    <img src="/static/img/carelink-logo.png" alt="CareLink Logo" class="h-10 w-auto object-contain shrink-0 group-hover:scale-105 transition-transform duration-200">
+                    <div class="flex flex-col justify-center">
+                        <span class="text-xl font-black tracking-tight text-slate-900 leading-tight">Care<span class="text-teal-600">Link</span></span>
+                        <span class="text-[11px] font-medium text-slate-500 hidden sm:block tracking-tight">Patient Referral & Capacity Management</span>
+                    </div>
+                </a>
+
+                <!-- Nav Links -->
+                <nav class="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">
+                    <a href="#about" class="hover:text-teal-600 transition">About Platform</a>
+                    <a href="#capabilities" class="hover:text-teal-600 transition">Capabilities</a>
+                    <a href="#protocol" class="hover:text-teal-600 transition">Referral Protocol</a>
+                    <a href="#faq" class="hover:text-teal-600 transition">FAQ</a>
+                </nav>
+
+                <!-- Action CTAs -->
+                <div class="flex items-center gap-3">
+                    <a href="/register-hospital/" class="hidden sm:inline-flex items-center text-xs font-bold text-slate-700 hover:text-slate-900 px-3.5 py-2 rounded-xl border border-slate-300 hover:bg-slate-100 transition">
+                        Register Facility
+                    </a>
+                    <a href="/login/" class="inline-flex items-center gap-2 text-xs font-bold text-white bg-slate-900 hover:bg-teal-600 px-4 py-2.5 rounded-xl shadow-sm transition-all duration-200">
+                        <i class="fa-solid fa-right-to-bracket text-xs"></i>
+                        <span>Sign In</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section (Rich in Context, No Badges) -->
+    <section class="relative py-16 sm:py-24 bg-white border-b border-slate-200">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
+            <!-- Plain Text Pre-title (No Badge / No Pill) -->
+            <p class="text-xs font-bold uppercase tracking-widest text-teal-600">
+                Inter-Hospital Patient Referral & Capacity Coordination
+            </p>
+
+            <!-- Headline -->
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.15]">
+                Intelligent Patient Referral & <br class="hidden sm:block">
+                <span class="text-teal-600">Hospital Capacity Management</span>
+            </h1>
+
+            <!-- Subtitle -->
+            <p class="text-base sm:text-lg text-slate-600 max-w-3xl mx-auto font-normal leading-relaxed">
+                CareLink is an intelligent patient transfer and capacity management platform connecting community clinics, general hospitals, and specialized trauma centers. By replacing manual telephone inquiries with real-time bed visibility, automated specialty matching, and continuous transit tracking, CareLink helps medical teams transfer urgent patients to the right facility without delays.
+            </p>
+
+            <!-- Hero Action Buttons -->
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-2">
+                <a href="/login/" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-slate-900 hover:bg-teal-600 text-white font-bold text-sm shadow-md transition-all duration-200">
+                    <i class="fa-solid fa-lock text-xs"></i>
+                    <span>Access Clinical Portal</span>
+                </a>
+                <a href="/register-hospital/" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-sm border border-slate-300 shadow-2xs transition">
+                    <i class="fa-solid fa-hospital text-slate-500 text-xs"></i>
+                    <span>Register Healthcare Facility</span>
+                </a>
+            </div>
+
+            <!-- Key Platform Highlights (Clean Text Rows, No Badges) -->
+            <div class="pt-10 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-6 text-left">
+                <div class="space-y-1">
+                    <p class="text-sm font-bold text-slate-900">Zero Uncoordinated Handoffs</p>
+                    <p class="text-xs text-slate-500 leading-relaxed">Transfers are only dispatched after receiving facility clinicians formally confirm specialist and bed readiness.</p>
+                </div>
+                <div class="space-y-1">
+                    <p class="text-sm font-bold text-slate-900">Real-Time Bed Visibility</p>
+                    <p class="text-xs text-slate-500 leading-relaxed">Up-to-date tracking of adult ICU, pediatric ICU, neonatal, isolation, and general emergency ward capacities.</p>
+                </div>
+                <div class="space-y-1">
+                    <p class="text-sm font-bold text-slate-900">End-to-End Auditability</p>
+                    <p class="text-xs text-slate-500 leading-relaxed">Every referral request, coordinator decision, clinical note, and handover timestamp is cryptographically archived.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why CareLink / The Clinical Problem & Solution -->
+    <section id="about" class="py-16 sm:py-20 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-3xl mx-auto mb-14 space-y-2">
+            <p class="text-xs font-bold uppercase tracking-widest text-teal-600">The Problem & Our Solution</p>
+            <h2 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Transforming Hospital Patient Referrals</h2>
+            <p class="text-sm text-slate-500">How CareLink eliminates communication bottlenecks between referring clinics, specialist centers, and transit teams.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Legacy Challenges -->
+            <div class="p-8 rounded-2xl bg-white border border-slate-200 space-y-4">
+                <div class="flex items-center gap-3 border-b border-slate-100 pb-3">
+                    <div class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center text-sm font-bold">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900">Traditional Referral Challenges</h3>
+                </div>
+                <ul class="space-y-3 text-xs text-slate-600 leading-relaxed">
+                    <li class="flex items-start gap-2.5">
+                        <i class="fa-solid fa-xmark text-rose-500 mt-0.5"></i>
+                        <span><strong>Protracted Telephone Queues:</strong> Referring clinicians spend hours attempting to contact tertiary hospital triage desks while patient stability declines.</span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <i class="fa-solid fa-xmark text-rose-500 mt-0.5"></i>
+                        <span><strong>Unverified Destination Capacity:</strong> Ambulances frequently arrive at overloaded emergency departments, forcing emergency diversion to secondary facilities.</span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <i class="fa-solid fa-xmark text-rose-500 mt-0.5"></i>
+                        <span><strong>Incomplete Clinical Handovers:</strong> Verbal phone orders and handwritten paper notes result in missed diagnostic histories, duplicate imaging, and medical errors.</span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <i class="fa-solid fa-xmark text-rose-500 mt-0.5"></i>
+                        <span><strong>Unmonitored Highway Transit:</strong> No centralized visibility over patient condition, en-route ambulance milestones, or estimated time of arrival.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- CareLink Modern Approach -->
+            <div class="p-8 rounded-2xl bg-white border border-slate-200 space-y-4">
+                <div class="flex items-center gap-3 border-b border-slate-100 pb-3">
+                    <div class="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center text-sm font-bold">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900">The CareLink Coordinated Platform</h3>
+                </div>
+                <ul class="space-y-3 text-xs text-slate-600 leading-relaxed">
+                    <li class="flex items-start gap-2.5">
+                        <i class="fa-solid fa-check text-teal-600 mt-0.5"></i>
+                        <span><strong>Rapid Electronic Submission:</strong> Standardized digital clinical forms capture vital signs, trauma scoring, diagnosis, and care requirements in minutes.</span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <i class="fa-solid fa-check text-teal-600 mt-0.5"></i>
+                        <span><strong>Instant Bed & Capability Verification:</strong> Real-time matrices indicate whether adult ICU, NICU, cath lab, or neurosurgical suites are actively available.</span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <i class="fa-solid fa-check text-teal-600 mt-0.5"></i>
+                        <span><strong>Structured Communication:</strong> Digital message exchange and document attachments ensure receiving teams review labs, ECGs, and imaging prior to patient arrival.</span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <i class="fa-solid fa-check text-teal-600 mt-0.5"></i>
+                        <span><strong>Synchronized Fleet Telemetry:</strong> Milestone progression across unit assignment, patient pickup, transit, and formal emergency bay handover.</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comprehensive Platform Capabilities (No Badges) -->
+    <section id="capabilities" class="py-16 sm:py-20 bg-white border-y border-slate-200">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-14 space-y-2">
+                <p class="text-xs font-bold uppercase tracking-widest text-teal-600">Core Capabilities</p>
+                <h2 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Comprehensive Referral Management Suite</h2>
+                <p class="text-sm text-slate-500">Engineered to streamline hospital operations, medical bed tracking, and patient transfer logistics.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Module 1 -->
+                <div class="p-6 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                    <div class="w-10 h-10 rounded-xl bg-white border border-slate-200 text-teal-600 flex items-center justify-center text-base">
+                        <i class="fa-solid fa-stethoscope"></i>
+                    </div>
+                    <h3 class="text-sm font-bold text-slate-900">Standardized Clinical Intake</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Referral creation workflow capturing patient demographics, clinical vitals (blood pressure, heart rate, oxygen saturation, GCS), preliminary diagnosis, ICD-10 categorization, and specific clinical justification for transfer.
+                    </p>
+                </div>
+
+                <!-- Module 2 -->
+                <div class="p-6 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                    <div class="w-10 h-10 rounded-xl bg-white border border-slate-200 text-teal-600 flex items-center justify-center text-base">
+                        <i class="fa-solid fa-microchip"></i>
+                    </div>
+                    <h3 class="text-sm font-bold text-slate-900">Algorithmic Hospital Matching</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Intelligent ranking engine evaluating patient acuity level, clinical subspecialty requirements (Cardiology, Neurosurgery, Burn Care, Orthopedics), live bed availability, and road driving times to identify optimal receiving centers.
+                    </p>
+                </div>
+
+                <!-- Module 3 -->
+                <div class="p-6 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                    <div class="w-10 h-10 rounded-xl bg-white border border-slate-200 text-teal-600 flex items-center justify-center text-base">
+                        <i class="fa-solid fa-bed-pulse"></i>
+                    </div>
+                    <h3 class="text-sm font-bold text-slate-900">Live Bed & Resource Visibility</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Continuous reporting of critical care resources across participating institutions. Tracks available adult ICU beds, pediatric ICU units, neonatal incubators, negative pressure isolation rooms, and functional mechanical ventilators.
+                    </p>
+                </div>
+
+                <!-- Module 4 -->
+                <div class="p-6 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                    <div class="w-10 h-10 rounded-xl bg-white border border-slate-200 text-teal-600 flex items-center justify-center text-base">
+                        <i class="fa-solid fa-truck-medical"></i>
+                    </div>
+                    <h3 class="text-sm font-bold text-slate-900">EMS Fleet & Telemetry Dispatch</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Centralized dispatch coordination assigning certified ambulance units, lead paramedics, and emergency drivers. Provides 5-stage milestone tracking from unit dispatch to patient pickup, transit, arrival, and medical handover.
+                    </p>
+                </div>
+
+                <!-- Module 5 -->
+                <div class="p-6 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                    <div class="w-10 h-10 rounded-xl bg-white border border-slate-200 text-teal-600 flex items-center justify-center text-base">
+                        <i class="fa-solid fa-comments"></i>
+                    </div>
+                    <h3 class="text-sm font-bold text-slate-900">Inter-Hospital Notes & Consults</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Secure digital messaging channel between transferring physicians and receiving specialists. Allows clarification on clinical history, pre-transfer stabilization orders, and instant notifications of patient status changes.
+                    </p>
+                </div>
+
+                <!-- Module 6 -->
+                <div class="p-6 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                    <div class="w-10 h-10 rounded-xl bg-white border border-slate-200 text-teal-600 flex items-center justify-center text-base">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                    <h3 class="text-sm font-bold text-slate-900">Analytics & Operational Oversight</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Comprehensive administrative dashboards tracking mean acceptance times, transfer volume by geographic corridor, referral outcome distributions, bed utilization efficiency, and operational turnaround metrics.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Detailed 4-Stage Clinical Referral Protocol (No Badges) -->
+    <section id="protocol" class="py-16 sm:py-20 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-3xl mx-auto mb-14 space-y-2">
+            <p class="text-xs font-bold uppercase tracking-widest text-teal-600">Standard Operating Protocol</p>
+            <h2 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">The 4-Stage Referral Lifecycle</h2>
+            <p class="text-sm text-slate-500">Every transfer follows a standardized digital workflow to ensure patient safety and facility readiness.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Stage 1 -->
+            <div class="p-6 rounded-2xl bg-white border border-slate-200 space-y-3">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Stage 1</p>
+                <h3 class="text-base font-bold text-slate-900">Referral Initiation</h3>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                    The attending clinician documents initial vitals, clinical impression, reason for transfer, and uploads supporting lab summaries or diagnostic images into the patient e-referral dossier.
+                </p>
+                <div class="pt-2 border-t border-slate-100 text-[11px] text-slate-500">
+                    <strong>Output:</strong> Complete electronic referral record with urgency category.
+                </div>
+            </div>
+
+            <!-- Stage 2 -->
+            <div class="p-6 rounded-2xl bg-white border border-slate-200 space-y-3">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Stage 2</p>
+                <h3 class="text-base font-bold text-slate-900">Triage & Facility Routing</h3>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                    Triage coordinators and the algorithmic matching engine identify the optimal receiving hospital with confirmed specialty services and verified bed capacity.
+                </p>
+                <div class="pt-2 border-t border-slate-100 text-[11px] text-slate-500">
+                    <strong>Output:</strong> Targeted transmission to candidate receiving hospital.
+                </div>
+            </div>
+
+            <!-- Stage 3 -->
+            <div class="p-6 rounded-2xl bg-white border border-slate-200 space-y-3">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Stage 3</p>
+                <h3 class="text-base font-bold text-slate-900">Hospital Acceptance</h3>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                    The receiving hospital intake team evaluates the clinical record. Upon acceptance, an inpatient or ICU bed is reserved, admitting staff are alerted, and preparation commences.
+                </p>
+                <div class="pt-2 border-t border-slate-100 text-[11px] text-slate-500">
+                    <strong>Output:</strong> Formal transfer acceptance notice and bed reservation.
+                </div>
+            </div>
+
+            <!-- Stage 4 -->
+            <div class="p-6 rounded-2xl bg-white border border-slate-200 space-y-3">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Stage 4</p>
+                <h3 class="text-base font-bold text-slate-900">Transit & Handover</h3>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                    The EMS dispatcher assigns transport. Paramedics log departure, route progress, and arrival. Formal transfer of clinical responsibility occurs at the emergency bay with signature signoff.
+                </p>
+                <div class="pt-2 border-t border-slate-100 text-[11px] text-slate-500">
+                    <strong>Output:</strong> Timestamped handover completion and archived audit log.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Frequently Asked Questions (FAQ) Section -->
+    <section id="faq" class="py-16 sm:py-20 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-2xl mx-auto mb-14 space-y-2">
+            <p class="text-xs font-bold uppercase tracking-widest text-teal-600">Common Inquiries</p>
+            <h2 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Frequently Asked Questions</h2>
+            <p class="text-sm text-slate-500">Frequently asked questions about patient transfer workflows, bed coordination, and platform features.</p>
+        </div>
+
+        <div class="space-y-4">
+            <div class="p-6 rounded-2xl bg-white border border-slate-200 space-y-2">
+                <h3 class="text-sm font-bold text-slate-900">What healthcare facilities can use the CareLink platform?</h3>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                    CareLink is designed for community clinics, district hospitals, tertiary medical centers, specialized trauma facilities, and ambulance transport providers that need a modern, coordinated platform for patient transfers and bed management.
+                </p>
+            </div>
+
+            <div class="p-6 rounded-2xl bg-white border border-slate-200 space-y-2">
+                <h3 class="text-sm font-bold text-slate-900">How does CareLink prevent emergency ambulance diversions?</h3>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                    Under the CareLink protocol, patient transport cannot be authorized until the receiving medical center explicitly confirms clinical acceptance and bed readiness in the system. Real-time capacity visibility prevents patients from being transported to overloaded emergency departments.
+                </p>
+            </div>
+
+            <div class="p-6 rounded-2xl bg-white border border-slate-200 space-y-2">
+                <h3 class="text-sm font-bold text-slate-900">How are clinical notes and diagnostic records transmitted?</h3>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                    Referring medical teams can attach digital documentation (laboratory findings, ECG strips, radiology summaries, and clinical progress notes) directly to the referral dossier. The receiving hospital's clinical team can review these files immediately, formulate a pre-arrival plan, and send guidance back to the referring team.
+                </p>
+            </div>
+
+            <div class="p-6 rounded-2xl bg-white border border-slate-200 space-y-2">
+                <h3 class="text-sm font-bold text-slate-900">What happens during an urgent life-threatening emergency?</h3>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                    Referrals flagged with the Resuscitation acuity priority bypass standard waiting queues and trigger high-priority alerts for triage coordinators and emergency intake teams, ensuring immediate specialist review within minutes.
+                </p>
+            </div>
+
+            <div class="p-6 rounded-2xl bg-white border border-slate-200 space-y-2">
+                <h3 class="text-sm font-bold text-slate-900">How does a hospital get started on CareLink?</h3>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                    Hospital administrators can submit a facility profile through the registration portal. Once approved by system administrators, staff and dispatch accounts are configured to start submitting and managing referrals immediately.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bottom Action Banner (Clean, No Badges) -->
+    <section class="py-16 bg-white border-t border-slate-200">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4">
+            <h3 class="text-xl sm:text-2xl font-black text-slate-900">
+                Modernize Patient Referrals Across Healthcare Facilities
+            </h3>
+            <p class="text-xs sm:text-sm text-slate-500 max-w-xl mx-auto leading-relaxed">
+                Hospital staff, triage coordinators, and ambulance dispatch teams can access the platform to streamline patient handovers, monitor bed capacity, and review referrals.
+            </p>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+                <a href="/login/" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-slate-900 hover:bg-teal-600 text-white font-bold text-xs shadow-sm transition">
+                    Sign In to Portal
+                </a>
+                <a href="/register-hospital/" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition">
+                    Register Healthcare Facility
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Clean Public Footer (No Badges) -->
+    <footer class="mt-auto bg-slate-100/70 border-t border-slate-200 py-10 px-4 sm:px-6 lg:px-8 text-xs text-slate-500">
+        <div class="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-8">
+            <div class="space-y-2 md:col-span-2">
+                <div class="flex items-center gap-2.5">
+                    <img src="/static/img/carelink-logo.png" alt="CareLink Logo" class="h-6 w-auto object-contain">
+                    <span class="text-sm font-black text-slate-900">Care<span class="text-teal-600">Link</span></span>
+                </div>
+                <p class="text-xs text-slate-500 max-w-sm leading-relaxed">
+                    A centralized inter-hospital patient referral and emergency triage coordination platform designed to simplify transfers, bed tracking, and ambulance logistics.
+                </p>
+            </div>
+
+            <div class="space-y-2">
+                <p class="text-xs font-bold uppercase tracking-wider text-slate-700">Platform Navigation</p>
+                <ul class="space-y-1.5 text-xs text-slate-500">
+                    <li><a href="#about" class="hover:text-slate-900 transition">About Platform</a></li>
+                    <li><a href="#capabilities" class="hover:text-slate-900 transition">Capabilities</a></li>
+                    <li><a href="#protocol" class="hover:text-slate-900 transition">Referral Protocol</a></li>
+                    <li><a href="#faq" class="hover:text-slate-900 transition">FAQ</a></li>
+                </ul>
+            </div>
+
+            <div class="space-y-2">
+                <p class="text-xs font-bold uppercase tracking-wider text-slate-700">Platform Access</p>
+                <ul class="space-y-1.5 text-xs text-slate-500">
+                    <li><a href="/login/" class="hover:text-slate-900 transition">Clinical Portal Login</a></li>
+                    <li><a href="/register-hospital/" class="hover:text-slate-900 transition">Facility Registration</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="max-w-6xl mx-auto pt-6 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-slate-500">
+            <div>&copy; 2026 CareLink Platform. Patient Referral & Logistics System.</div>
+            <div class="flex items-center gap-4">
+                <span>Inter-Hospital Coordination Platform</span>
+            </div>
+        </div>
+    </footer>
+
+</div>
+{% endblock %}

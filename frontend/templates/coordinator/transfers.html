@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block title %}Regional Fleet & Transfer Telemetry — CareLink{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-5">
+        <div>
+            <span class="text-xs font-bold text-teal-600 uppercase tracking-wider">Regional Transfer Telemetry</span>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-0.5">Active Fleet & Transfer Telemetry</h1>
+            <p class="text-xs text-slate-500 mt-1">Cross-regional situational awareness of active transfers, moving ambulances, and bed handovers</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button onclick="refreshCoordinatorTransfers(this)" class="px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition shadow-sm flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-solid fa-rotate text-primary-600"></i> Refresh Fleet Telemetry
+            </button>
+        </div>
+    </div>
+
+    <!-- Active Transit Summary -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-truck-medical"></i>
+            </div>
+            <div>
+                <p class="text-xs font-semibold text-slate-500 uppercase">In Transit En Route</p>
+                <p id="ct-active-count" class="text-2xl font-black text-slate-900">0</p>
+            </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-clock"></i>
+            </div>
+            <div>
+                <p class="text-xs font-semibold text-slate-500 uppercase">Awaiting Unit Assignment</p>
+                <p id="ct-pending-count" class="text-2xl font-black text-slate-900">0</p>
+            </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-check-double"></i>
+            </div>
+            <div>
+                <p class="text-xs font-semibold text-slate-500 uppercase">Completed Transports</p>
+                <p id="ct-completed-count" class="text-2xl font-black text-slate-900">0</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Regional Transfers Table -->
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+            <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                <i class="fa-solid fa-satellite-dish text-teal-600"></i> Regional Patient Transfers in Motion
+            </h3>
+            <span class="text-xs text-slate-500">Live milestone updates</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 text-slate-600 text-xs uppercase font-semibold border-b border-slate-100">
+                    <tr>
+                        <th class="px-6 py-3.5">Transfer Code</th>
+                        <th class="px-6 py-3.5">Patient / Referral</th>
+                        <th class="px-6 py-3.5">Origin Hospital</th>
+                        <th class="px-6 py-3.5">Destination Facility</th>
+                        <th class="px-6 py-3.5">Assigned Vehicle</th>
+                        <th class="px-6 py-3.5">Transit Stage</th>
+                        <th class="px-6 py-3.5 text-right">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="coord-transfers-tbody" class="divide-y divide-slate-100">
+                    <tr><td colspan="7" class="px-6 py-8 text-center text-slate-400">Loading regional fleet data...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        requireRole('COORDINATOR');
+        loadCoordinatorTransfersTelemetry();
+    });
+</script>
+{% endblock %}

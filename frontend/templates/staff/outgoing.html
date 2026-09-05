@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Outgoing Referrals — CareLink{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-5">
+        <div>
+            <span class="text-xs font-bold text-teal-600 uppercase tracking-wider">Clinical Operations</span>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-0.5">Outgoing Referrals</h1>
+            <p class="text-xs text-slate-500 mt-1">Patients referred from your hospital to external specialized facilities</p>
+        </div>
+        <div class="flex gap-2">
+            <a href="/staff/create-referral/" class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-primary-600 hover:bg-primary-700 transition shadow-sm flex items-center gap-1.5">
+                <i class="fa-solid fa-plus-circle"></i> Create Referral
+            </a>
+            <button onclick="refreshStaffOutgoing(this)" class="px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition shadow-sm flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-solid fa-rotate text-primary-600"></i> Refresh
+            </button>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-4 bg-slate-50 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+                <input id="staff-search-input" onkeyup="filterStaffReferrals()" type="text" placeholder="Search outgoing referrals..." class="px-3.5 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none w-72">
+            </div>
+            <span class="text-xs text-slate-500 font-medium">Outgoing referral queue (<span id="outgoing-tab-count" class="font-bold text-slate-800">0</span> cases)</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 text-slate-600 text-xs uppercase font-semibold border-b border-slate-100">
+                    <tr>
+                        <th class="px-6 py-3.5">Referral Code</th>
+                        <th class="px-6 py-3.5">Patient Info</th>
+                        <th class="px-6 py-3.5">Required Service / Facility</th>
+                        <th class="px-6 py-3.5">Target Hospital</th>
+                        <th class="px-6 py-3.5">Urgency</th>
+                        <th class="px-6 py-3.5">Status</th>
+                        <th class="px-6 py-3.5 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="staff-referrals-tbody" class="divide-y divide-slate-100">
+                    <tr><td colspan="7" class="px-6 py-8 text-center text-slate-400">Loading outgoing referrals...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        requireRole('STAFF');
+        currentStaffTab = 'outgoing';
+        loadStaffDashboardData();
+    });
+</script>
+{% endblock %}

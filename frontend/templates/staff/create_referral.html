@@ -1,0 +1,270 @@
+{% extends 'base.html' %}
+{% block title %}Create Patient Referral — CareLink{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-5">
+        <div>
+            <span class="text-xs font-bold text-primary-600 uppercase tracking-wider">Patient Referral Intake</span>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-0.5">New Patient Referral</h1>
+            <p class="text-xs text-slate-500 mt-1">Enter patient clinical condition, required medical services, and select target hospital</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <span id="draft-save-indicator" class="text-[11px] text-slate-400 hidden sm:flex items-center gap-1.5">
+                <i class="fa-solid fa-cloud text-slate-400"></i> Auto-save ready
+            </span>
+            <a href="/staff-dashboard/" class="px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition shadow-sm flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Draft Recovery Alert Banner -->
+    <div id="draft-recovery-banner" class="hidden bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/80 rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-sm font-bold flex-shrink-0">
+                <i class="fa-solid fa-file-pen"></i>
+            </div>
+            <div>
+                <p class="text-xs font-bold text-slate-800">Unsaved Referral Draft Found</p>
+                <p class="text-[11px] text-slate-500" id="draft-banner-time">An unfinished patient intake draft was saved from your previous session.</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+            <button onclick="restoreReferralDraft()" class="flex-1 sm:flex-none px-3.5 py-1.5 rounded-xl text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white transition shadow-sm cursor-pointer">
+                <i class="fa-solid fa-arrow-rotate-left mr-1"></i> Restore Draft
+            </button>
+            <button onclick="discardReferralDraft()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 transition cursor-pointer">
+                Discard
+            </button>
+        </div>
+    </div>
+
+    <!-- 4-Step Referral Intake Wizard -->
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-6">
+        <!-- Wizard Steps Indicator -->
+        <div class="grid grid-cols-4 gap-2 border-b border-slate-100 pb-4 text-xs font-bold">
+            <div id="step-tab-1" onclick="goToWizardStep(1)" class="text-center p-2.5 rounded-xl bg-primary-50 text-primary-700 border border-primary-200 flex items-center justify-center gap-1.5 cursor-pointer">
+                <span class="w-5 h-5 rounded-full bg-primary-600 text-white flex items-center justify-center text-[10px]">1</span> Patient
+            </div>
+            <div id="step-tab-2" onclick="goToWizardStep(2)" class="text-center p-2.5 rounded-xl bg-slate-50 text-slate-500 border border-slate-200 flex items-center justify-center gap-1.5 cursor-pointer">
+                <span class="w-5 h-5 rounded-full bg-slate-300 text-white flex items-center justify-center text-[10px]">2</span> Clinical
+            </div>
+            <div id="step-tab-3" onclick="goToWizardStep(3)" class="text-center p-2.5 rounded-xl bg-slate-50 text-slate-500 border border-slate-200 flex items-center justify-center gap-1.5 cursor-pointer">
+                <span class="w-5 h-5 rounded-full bg-slate-300 text-white flex items-center justify-center text-[10px]">3</span> Routing
+            </div>
+            <div id="step-tab-4" onclick="goToWizardStep(4)" class="text-center p-2.5 rounded-xl bg-slate-50 text-slate-500 border border-slate-200 flex items-center justify-center gap-1.5 cursor-pointer">
+                <span class="w-5 h-5 rounded-full bg-slate-300 text-white flex items-center justify-center text-[10px]">4</span> Review
+            </div>
+        </div>
+
+        <form id="create-referral-form" onsubmit="submitNewReferral(event)">
+            <!-- Step 1: Patient Demographics -->
+            <div id="wizard-step-1" class="space-y-4">
+                <h4 class="font-bold text-sm text-slate-900 border-b border-slate-100 pb-2">Step 1: Patient Identification</h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Full Patient Name *</label>
+                        <input id="ref-pat-name" type="text" required placeholder="e.g. Robert Johnson" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Age *</label>
+                            <input id="ref-pat-age" type="number" min="0" max="130" required placeholder="45" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Sex *</label>
+                            <select id="ref-pat-sex" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Government / Health Card ID</label>
+                    <input id="ref-pat-id" type="text" placeholder="e.g. PHILHEALTH-993-219" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                </div>
+                <div class="flex justify-end pt-3">
+                    <button type="button" onclick="goToWizardStep(2)" class="px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-primary-600 hover:bg-primary-700 transition">Next: Clinical Condition &rarr;</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Clinical Details -->
+            <div id="wizard-step-2" class="hidden space-y-4">
+                <h4 class="font-bold text-sm text-slate-900 border-b border-slate-100 pb-2">Step 2: Clinical Assessment</h4>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Primary Diagnosis / Condition *</label>
+                    <input id="ref-pat-condition" type="text" required placeholder="Acute STEMI, Anterior Wall" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Reason for Referral *</label>
+                    <input id="ref-reason" type="text" required placeholder="Needs emergent catheterization and coronary stent placement..." class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Clinical Summary *</label>
+                    <textarea id="ref-pat-summary" rows="2" required placeholder="Detailed clinical summary and chief complaints..." class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none"></textarea>
+                </div>
+
+                <!-- Clinical Vitals & Real-Time MEWS Calculation -->
+                <div class="p-4 rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100/70 border border-slate-200/80 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-lg bg-primary-100 text-primary-700 flex items-center justify-center text-xs">
+                                <i class="fa-solid fa-heart-pulse"></i>
+                            </span>
+                            <h5 class="text-xs font-bold text-slate-900">Bedside Vitals & MEWS Clinical Scoring</h5>
+                        </div>
+                        <span id="mews-badge-preview" class="hidden text-[11px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider"></span>
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-6 gap-2.5 text-xs">
+                        <div>
+                            <label class="block text-[11px] font-medium text-slate-600 mb-0.5">Systolic BP</label>
+                            <input id="ref-vitals-sbp" type="number" oninput="triggerStaffAIFilter()" placeholder="120" class="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                            <span class="text-[10px] text-slate-400">mmHg</span>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-medium text-slate-600 mb-0.5">Heart Rate</label>
+                            <input id="ref-vitals-hr" type="number" oninput="triggerStaffAIFilter()" placeholder="80" class="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                            <span class="text-[10px] text-slate-400">bpm</span>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-medium text-slate-600 mb-0.5">Resp Rate</label>
+                            <input id="ref-vitals-rr" type="number" oninput="triggerStaffAIFilter()" placeholder="16" class="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                            <span class="text-[10px] text-slate-400">/min</span>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-medium text-slate-600 mb-0.5">Temp (°C)</label>
+                            <input id="ref-vitals-temp" type="number" step="0.1" oninput="triggerStaffAIFilter()" placeholder="36.8" class="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                            <span class="text-[10px] text-slate-400">celsius</span>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-medium text-slate-600 mb-0.5">SpO2 (%)</label>
+                            <input id="ref-vitals-spo2" type="number" oninput="triggerStaffAIFilter()" placeholder="98" class="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                            <span class="text-[10px] text-slate-400">percent</span>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-medium text-slate-600 mb-0.5">AVPU Scale</label>
+                            <select id="ref-vitals-avpu" onchange="triggerStaffAIFilter()" class="w-full px-2 py-1.5 rounded-lg border border-slate-300 text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                                <option value="A">Alert</option>
+                                <option value="V">Voice</option>
+                                <option value="P">Pain</option>
+                                <option value="U">Unresponsive</option>
+                            </select>
+                            <span class="text-[10px] text-slate-400">mental</span>
+                        </div>
+                    </div>
+                    <div id="mews-alerts-container" class="hidden space-y-1 pt-1"></div>
+                </div>
+                <div id="create-ref-error" class="hidden p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700"></div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Clinical Urgency *</label>
+                        <select id="ref-urgency-select" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                            <option value="ROUTINE">Routine (Ward transfer, elective)</option>
+                            <option value="URGENT">Urgent (Within 4-12 hours)</option>
+                            <option value="EMERGENCY">Emergency (Life-critical, immediate)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Required Medical Service *</label>
+                        <select id="ref-service-select" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                            <option value="">Loading services...</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex justify-between pt-3">
+                    <button type="button" onclick="goToWizardStep(1)" class="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition">&larr; Back</button>
+                    <button type="button" onclick="goToWizardStep(3)" class="px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-primary-600 hover:bg-primary-700 transition">Next: Routing &rarr;</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Destination Routing -->
+            <div id="wizard-step-3" class="hidden space-y-4">
+                <h4 class="font-bold text-sm text-slate-900 border-b border-slate-100 pb-2">Step 3: Destination Facility</h4>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Destination Facility</label>
+                    <select id="ref-target-hospital-select" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                        <option value="">AI Matcher / Coordinator Assigned (Recommended)</option>
+                    </select>
+                    <p class="text-[11px] text-slate-500 mt-1">If left blank, our regional XGBoost matcher automatically assigns the best hospital with open bed capacity.</p>
+                </div>
+
+                <!-- Live AI Suggestions Preview for Referring Staff -->
+                <div class="mt-4 p-4 rounded-2xl bg-white border border-primary-100 shadow-sm space-y-3">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                        <div class="flex items-center gap-2">
+                            <span class="w-7 h-7 rounded-lg bg-primary-600 text-white flex items-center justify-center text-xs shadow-sm">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            </span>
+                            <div>
+                                <h5 class="text-xs font-bold text-slate-900">AI Hospital Match Recommendations</h5>
+                                <p class="text-[10px] text-slate-400">Ranked by XGBoost using travel ETA, in-transit capacity, and clinical specialty</p>
+                            </div>
+                        </div>
+                        <button type="button" onclick="triggerStaffAIFilter()" class="text-[11px] font-bold text-primary-600 hover:text-primary-700">
+                            <i class="fa-solid fa-rotate-right mr-1"></i> Refresh
+                        </button>
+                    </div>
+                    <div id="staff-ai-suggestions-list" class="space-y-2">
+                        <p class="text-center py-4 text-xs text-slate-400">Select required service and review vitals to generate live matches.</p>
+                    </div>
+                </div>
+                <div class="flex justify-between pt-3">
+                    <button type="button" onclick="goToWizardStep(2)" class="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition">&larr; Back</button>
+                    <button type="button" onclick="populateWizardReview(); goToWizardStep(4);" class="px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-primary-600 hover:bg-primary-700 transition">Next: Review & Confirm &rarr;</button>
+                </div>
+            </div>
+
+            <!-- Step 4: Review & Submit -->
+            <div id="wizard-step-4" class="hidden space-y-4">
+                <h4 class="font-bold text-sm text-slate-900 border-b border-slate-100 pb-2">Step 4: Confirm Referral</h4>
+                <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2 text-xs">
+                    <p><strong class="text-slate-700">Patient:</strong> <span id="rev-patient-name" class="font-semibold text-slate-900">--</span> (<span id="rev-patient-meta">--</span>)</p>
+                    <p><strong class="text-slate-700">Clinical Case:</strong> <span id="rev-condition-reason">--</span></p>
+                    <p><strong class="text-slate-700">Required Service:</strong> <span id="rev-service" class="font-bold text-primary-700">--</span></p>
+                    <p><strong class="text-slate-700">Target Facility:</strong> <span id="rev-destination">--</span></p>
+                </div>
+                <div class="flex justify-between pt-3">
+                    <button type="button" onclick="goToWizardStep(3)" class="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition">&larr; Back</button>
+                    <div class="flex gap-2">
+                        <button type="button" onclick="saveReferralAsDraft()" class="px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition">Save Draft</button>
+                        <button type="submit" id="ref-submit-btn" class="px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-primary-600 hover:bg-primary-700 shadow-md transition">Submit Referral</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        requireRole('STAFF');
+        try {
+            const [servRes, hospRes] = await Promise.all([
+                apiFetch('/hospitals/services/'),
+                apiFetch('/hospitals/?verification_status=APPROVED')
+            ]);
+            if (servRes && servRes.ok) {
+                const svcs = (await servRes.json()).results || (await servRes.json());
+                const sel = document.getElementById('ref-service-select');
+                if (sel) {
+                    sel.innerHTML = '<option value="">Select Required Service...</option>' +
+                        svcs.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+                }
+            }
+            if (hospRes && hospRes.ok) {
+                const hosps = (await hospRes.json()).results || (await hospRes.json());
+                const targetSel = document.getElementById('ref-target-hospital-select');
+                const user = getUser();
+                if (targetSel) {
+                    const valid = hosps.filter(h => h.id !== (user ? user.hospital_id : null));
+                    targetSel.innerHTML = '<option value="">AI Matcher / Coordinator Assigned (Recommended)</option>' +
+                        valid.map(h => `<option value="${h.id}">${h.name} (${h.available_beds} beds free)</option>`).join('');
+                }
+            }
+        } catch (e) { console.error(e); }
+    });
+</script>
+{% endblock %}

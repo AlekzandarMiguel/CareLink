@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}System Catalogs & Settings — CareLink{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-5">
+        <div>
+            <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider">System Configuration</span>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-0.5">System Catalogs & Dictionaries</h1>
+            <p class="text-xs text-slate-500 mt-1">Manage clinical capabilities, medical specialties, and equipment taxonomies</p>
+        </div>
+        <button onclick="refreshAdminCatalogs(this)" class="px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition shadow-sm flex items-center gap-1.5 cursor-pointer">
+            <i class="fa-solid fa-rotate text-primary-600"></i> Refresh Catalogs
+        </button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Medical Services -->
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h4 class="font-bold text-sm text-slate-900"><i class="fa-solid fa-stethoscope text-primary-600 mr-2"></i> Medical Services</h4>
+                <span id="catalog-service-count" class="text-xs font-bold px-2 py-0.5 rounded-full bg-primary-100 text-primary-700">0</span>
+            </div>
+            <div id="catalog-services-list" class="space-y-1.5 max-h-80 overflow-y-auto text-xs">
+                <p class="text-slate-400 text-center py-4">Loading services...</p>
+            </div>
+            <form onsubmit="addCatalogItem(event, 'services')" class="flex gap-2 pt-3 border-t border-slate-100">
+                <input type="text" id="new-service-name" placeholder="New Service..." required class="flex-1 px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                <button type="submit" class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-primary-600 hover:bg-primary-700">Add</button>
+            </form>
+        </div>
+
+        <!-- Facilities -->
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h4 class="font-bold text-sm text-slate-900"><i class="fa-solid fa-microscope text-teal-600 mr-2"></i> Hospital Facilities</h4>
+                <span id="catalog-facility-count" class="text-xs font-bold px-2 py-0.5 rounded-full bg-teal-100 text-teal-700">0</span>
+            </div>
+            <div id="catalog-facilities-list" class="space-y-1.5 max-h-80 overflow-y-auto text-xs">
+                <p class="text-slate-400 text-center py-4">Loading facilities...</p>
+            </div>
+            <form onsubmit="addCatalogItem(event, 'facilities')" class="flex gap-2 pt-3 border-t border-slate-100">
+                <input type="text" id="new-facility-name" placeholder="New Facility..." required class="flex-1 px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                <button type="submit" class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-teal-600 hover:bg-teal-700">Add</button>
+            </form>
+        </div>
+
+        <!-- Specialties -->
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h4 class="font-bold text-sm text-slate-900"><i class="fa-solid fa-user-doctor text-amber-600 mr-2"></i> Specialties</h4>
+                <span id="catalog-specialty-count" class="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">0</span>
+            </div>
+            <div id="catalog-specialties-list" class="space-y-1.5 max-h-80 overflow-y-auto text-xs">
+                <p class="text-slate-400 text-center py-4">Loading specialties...</p>
+            </div>
+            <form onsubmit="addCatalogItem(event, 'specialties')" class="flex gap-2 pt-3 border-t border-slate-100">
+                <input type="text" id="new-specialty-name" placeholder="New Specialty..." required class="flex-1 px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                <button type="submit" class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-amber-600 hover:bg-amber-700">Add</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        requireRole('ADMIN');
+        loadAdminCatalogs();
+    });
+</script>
+{% endblock %}

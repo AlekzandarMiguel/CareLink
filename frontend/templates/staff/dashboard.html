@@ -1,0 +1,541 @@
+{% extends 'base.html' %}
+{% block title %}Clinical Staff Dashboard — CareLink{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-5">
+        <div>
+            <span class="text-xs font-bold text-primary-600 uppercase tracking-wider">Clinical Referral Center</span>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-0.5" id="staff-hospital-title">Hospital Clinical Operations</h1>
+            <p class="text-xs text-slate-500 mt-1" id="staff-user-meta">Manage active transfers, review inbound clinical cases, and track live ward capacity.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+            <button onclick="refreshStaffDashboard(this)" class="px-4 py-2 rounded-xl text-sm font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition shadow-sm flex items-center gap-2 cursor-pointer">
+                <i class="fa-solid fa-rotate text-primary-600"></i> Refresh
+            </button>
+            <button onclick="openCapacityModal()" class="px-4 py-2 rounded-xl text-sm font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition shadow-sm flex items-center gap-2">
+                <i class="fa-solid fa-bed-pulse text-teal-600"></i> Update Bed Capacity
+            </button>
+            <button onclick="openNewReferralModal()" class="px-4 py-2 rounded-xl text-sm font-bold text-white bg-primary-600 hover:bg-primary-700 transition shadow-md shadow-primary-500/20 flex items-center gap-2">
+                <i class="fa-solid fa-plus-circle"></i> Create Referral
+            </button>
+        </div>
+    </div>
+
+    <!-- Live Hospital Operational Metrics -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <p class="text-xs font-semibold text-slate-500 uppercase">Outgoing Referrals</p>
+            <p id="staff-stat-outgoing" class="text-3xl font-black text-slate-900 mt-1">--</p>
+            <p class="text-xs text-slate-500 mt-1">Initiated by your hospital</p>
+        </div>
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <p class="text-xs font-semibold text-slate-500 uppercase">Incoming Requests</p>
+            <p id="staff-stat-incoming" class="text-3xl font-black text-primary-600 mt-1">--</p>
+            <p class="text-xs text-slate-500 mt-1">Cases awaiting clinical review</p>
+        </div>
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <p class="text-xs font-semibold text-slate-500 uppercase">Available General Beds</p>
+            <p id="staff-stat-beds" class="text-3xl font-black text-teal-600 mt-1">--</p>
+            <p class="text-xs text-slate-500 mt-1">Regular ward capacity</p>
+        </div>
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <p class="text-xs font-semibold text-slate-500 uppercase">Available ICU Beds</p>
+            <p id="staff-stat-icu" class="text-3xl font-black text-rose-600 mt-1">--</p>
+            <p class="text-xs text-slate-500 mt-1">Critical care capacity</p>
+        </div>
+    </div>
+
+    <!-- Clinical Operations Action Grid -->
+    <div class="space-y-4">
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="text-lg font-bold text-slate-900">Clinical Workspaces</h2>
+                <p class="text-xs text-slate-500">Quick access to patient routing, admissions, and team management</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <!-- Card 1: Outgoing Referrals -->
+            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between hover:shadow-md transition">
+                <div>
+                    <div class="w-10 h-10 rounded-2xl bg-primary-50 text-primary-600 flex items-center justify-center mb-4 text-base">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </div>
+                    <div class="flex items-center justify-between mb-1">
+                        <h3 class="font-bold text-slate-900 text-base">Outgoing Referrals</h3>
+                        <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-primary-100 text-primary-800"><span id="outgoing-tab-count">0</span> Active</span>
+                    </div>
+                    <p class="text-xs text-slate-500 leading-relaxed">
+                        Track patient transfers initiated by your hospital, review transit milestones, and follow up.
+                    </p>
+                </div>
+                <div class="pt-5 mt-4 border-t border-slate-100 flex items-center justify-between">
+                    <a href="/staff/outgoing/" class="inline-flex items-center text-xs font-bold text-primary-600 hover:text-primary-700">
+                        View Outgoing <i class="fa-solid fa-arrow-right ml-1.5 text-[10px]"></i>
+                    </a>
+                    <button onclick="openNewReferralModal()" class="text-xs text-slate-400 hover:text-slate-600 font-semibold">
+                        + New
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card 2: Incoming Requests -->
+            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between hover:shadow-md transition">
+                <div>
+                    <div class="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mb-4 text-base">
+                        <i class="fa-solid fa-inbox"></i>
+                    </div>
+                    <div class="flex items-center justify-between mb-1">
+                        <h3 class="font-bold text-slate-900 text-base">Incoming Requests</h3>
+                        <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800"><span id="incoming-tab-count">0</span> Inbound</span>
+                    </div>
+                    <p class="text-xs text-slate-500 leading-relaxed">
+                        Review inbound transfer requests from partner facilities, evaluate clinical notes, and accept cases.
+                    </p>
+                </div>
+                <div class="pt-5 mt-4 border-t border-slate-100">
+                    <a href="/staff/incoming/" class="inline-flex items-center text-xs font-bold text-amber-600 hover:text-amber-700">
+                        Review Inbound <i class="fa-solid fa-arrow-right ml-1.5 text-[10px]"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Card 3: Ward & ICU Capacity -->
+            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between hover:shadow-md transition">
+                <div>
+                    <div class="w-10 h-10 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center mb-4 text-base">
+                        <i class="fa-solid fa-bed-pulse"></i>
+                    </div>
+                    <div class="flex items-center justify-between mb-1">
+                        <h3 class="font-bold text-slate-900 text-base">Bed & ICU Capacity</h3>
+                        <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-teal-100 text-teal-800">Live Status</span>
+                    </div>
+                    <p class="text-xs text-slate-500 leading-relaxed">
+                        Update available regular ward beds and ICU critical care units to inform regional coordination.
+                    </p>
+                </div>
+                <div class="pt-5 mt-4 border-t border-slate-100 flex items-center justify-between">
+                    <a href="/staff/capacity/" class="inline-flex items-center text-xs font-bold text-teal-600 hover:text-teal-700">
+                        Capacity Details <i class="fa-solid fa-arrow-right ml-1.5 text-[10px]"></i>
+                    </a>
+                    <button onclick="openCapacityModal()" class="text-xs text-slate-400 hover:text-slate-600 font-semibold">
+                        Update
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card 4: Clinical Team -->
+            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between hover:shadow-md transition">
+                <div>
+                    <div class="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-4 text-base">
+                        <i class="fa-solid fa-user-group"></i>
+                    </div>
+                    <div class="flex items-center justify-between mb-1">
+                        <h3 class="font-bold text-slate-900 text-base">Clinical Team</h3>
+                        <span id="staff-team-count" class="text-xs font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800">--</span>
+                    </div>
+                    <p class="text-xs text-slate-500 leading-relaxed">
+                        Maintain departmental clinical contacts, on-duty physicians, and emergency phone coverage.
+                    </p>
+                </div>
+                <div class="pt-5 mt-4 border-t border-slate-100 flex items-center justify-between">
+                    <a href="/staff/team/" class="inline-flex items-center text-xs font-bold text-indigo-600 hover:text-indigo-700">
+                        Manage Team <i class="fa-solid fa-arrow-right ml-1.5 text-[10px]"></i>
+                    </a>
+                    <button onclick="openNewStaffModal()" class="text-xs text-slate-400 hover:text-slate-600 font-semibold">
+                        + Add
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Cases Quick Monitor -->
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="border-b border-slate-200 px-6 pt-4 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex space-x-6">
+                <button onclick="switchStaffTab('outgoing')" id="tab-btn-outgoing" class="pb-4 font-bold text-sm text-primary-600 border-b-2 border-primary-600 flex items-center gap-2">
+                    <i class="fa-solid fa-paper-plane text-xs"></i> Outgoing Referrals
+                </button>
+                <button onclick="switchStaffTab('incoming')" id="tab-btn-incoming" class="pb-4 font-bold text-sm text-slate-500 hover:text-slate-700 flex items-center gap-2">
+                    <i class="fa-solid fa-inbox text-xs"></i> Incoming Requests
+                </button>
+            </div>
+            <div id="staff-search-container" class="pb-3 flex gap-2">
+                <input id="staff-search-input" onkeyup="filterStaffReferrals()" type="text" placeholder="Filter cases..." class="px-3.5 py-1.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none">
+            </div>
+        </div>
+
+        <!-- Table View: Referrals -->
+        <div id="staff-referrals-view" class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 text-slate-600 text-xs uppercase font-semibold border-b border-slate-100">
+                    <tr>
+                        <th class="px-6 py-3.5">Referral Code</th>
+                        <th class="px-6 py-3.5">Patient Info</th>
+                        <th class="px-6 py-3.5">Required Service / Facility</th>
+                        <th class="px-6 py-3.5">Target Hospital</th>
+                        <th class="px-6 py-3.5">Urgency</th>
+                        <th class="px-6 py-3.5">Status</th>
+                        <th class="px-6 py-3.5 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="staff-referrals-tbody" class="divide-y divide-slate-100">
+                    <tr><td colspan="7" class="px-6 py-8 text-center text-slate-400">Loading referrals...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Hidden container for team data loader compatibility -->
+        <div id="staff-team-view" class="hidden">
+            <table><tbody id="staff-team-tbody"></tbody></table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Update Bed Capacity -->
+<div id="capacity-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-5 shadow-2xl border border-slate-200">
+        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+            <h3 class="text-lg font-bold text-slate-900">Update Hospital Bed Capacity</h3>
+            <button onclick="closeCapacityModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form id="capacity-update-form" onsubmit="submitCapacityUpdate(event)" class="space-y-4">
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Available General Beds</label>
+                <input id="cap-avail-beds" type="number" min="0" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Available ICU Beds</label>
+                <input id="cap-avail-icu" type="number" min="0" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button type="button" onclick="closeCapacityModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200">Cancel</button>
+                <button type="submit" class="px-5 py-2 rounded-xl text-xs font-bold text-white bg-primary-600 hover:bg-primary-700 shadow-md">Update Live Status</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Add Clinical Staff -->
+<div id="new-staff-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-5 shadow-2xl border border-slate-200">
+        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+            <h3 class="text-lg font-bold text-slate-900">Add Clinical Staff Member</h3>
+            <button onclick="closeNewStaffModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form id="create-staff-form" onsubmit="submitNewStaffMember(event)" class="space-y-4">
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Full Name *</label>
+                <input id="staff-add-name" type="text" required placeholder="Dr. Alice Smith" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Email Address *</label>
+                <input id="staff-add-email" type="email" required placeholder="alice.smith@hospital.local" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Position / Department *</label>
+                <input id="staff-add-position" type="text" required placeholder="Attending Cardiologist, ED" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Contact Number</label>
+                <input id="staff-add-contact" type="text" placeholder="+1 (555) 000-0000" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Initial Password *</label>
+                <input id="staff-add-password" type="password" required placeholder="••••••••" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+            </div>
+            <div id="staff-add-error" class="hidden p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700"></div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button type="button" onclick="closeNewStaffModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200">Cancel</button>
+                <button type="submit" id="staff-add-btn" class="px-5 py-2 rounded-xl text-xs font-bold text-white bg-teal-600 hover:bg-teal-700 shadow-md">Add Staff Account</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Multi-Step Create Referral Modal (4-Step Wizard) -->
+<div id="new-referral-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 p-6 sm:p-8 space-y-6">
+        <div class="flex justify-between items-center border-b border-slate-200 pb-4">
+            <div>
+                <span class="text-xs font-bold text-primary-600 uppercase">Referral Intake Wizard</span>
+                <h3 class="text-xl font-extrabold text-slate-900">Create Patient Referral</h3>
+            </div>
+            <button onclick="closeNewReferralModal()" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <!-- 4-Step Progress Indicator (Clickable) -->
+        <div class="grid grid-cols-4 gap-2 border-b border-slate-100 pb-4 text-xs font-bold">
+            <div id="step-tab-1" onclick="goToWizardStep(1)" class="cursor-pointer text-center p-2 rounded-xl bg-brand-50 text-brand-700 border border-brand-200 flex items-center justify-center gap-1.5 transition hover:bg-brand-100/60">
+                <span class="w-5 h-5 rounded-full bg-brand-600 text-white flex items-center justify-center text-[10px]">1</span>
+                <span class="hidden sm:inline">Patient</span>
+            </div>
+            <div id="step-tab-2" onclick="goToWizardStep(2)" class="cursor-pointer text-center p-2 rounded-xl bg-slate-50 text-slate-500 border border-slate-200 flex items-center justify-center gap-1.5 transition hover:bg-slate-100">
+                <span class="w-5 h-5 rounded-full bg-slate-300 text-white flex items-center justify-center text-[10px]">2</span>
+                <span class="hidden sm:inline">Requirements</span>
+            </div>
+            <div id="step-tab-3" onclick="goToWizardStep(3)" class="cursor-pointer text-center p-2 rounded-xl bg-slate-50 text-slate-500 border border-slate-200 flex items-center justify-center gap-1.5 transition hover:bg-slate-100">
+                <span class="w-5 h-5 rounded-full bg-slate-300 text-white flex items-center justify-center text-[10px]">3</span>
+                <span class="hidden sm:inline">Diagnostics</span>
+            </div>
+            <div id="step-tab-4" onclick="goToWizardStep(4)" class="cursor-pointer text-center p-2 rounded-xl bg-slate-50 text-slate-500 border border-slate-200 flex items-center justify-center gap-1.5 transition hover:bg-slate-100">
+                <span class="w-5 h-5 rounded-full bg-slate-300 text-white flex items-center justify-center text-[10px]">4</span>
+                <span class="hidden sm:inline">Review</span>
+            </div>
+        </div>
+
+        <form id="create-referral-form" onsubmit="submitNewReferral(event)" class="space-y-6">
+            <!-- STEP 1: Patient Information -->
+            <div id="wizard-step-1" class="space-y-4">
+                <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Step 1 — Patient Clinical Information</h4>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Patient Full Name *</label>
+                        <input id="ref-pat-name" type="text" required placeholder="John Doe" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Age *</label>
+                        <input id="ref-pat-age" type="number" required placeholder="45" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Sex *</label>
+                        <select id="ref-pat-sex" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                            <option value="MALE">Male</option>
+                            <option value="FEMALE">Female</option>
+                            <option value="OTHER">Other</option>
+                        </select>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Current Diagnosis / Condition *</label>
+                        <input id="ref-pat-condition" type="text" required placeholder="e.g. Acute STEMI, Severe Trauma" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                    </div>
+                    <div class="sm:col-span-3">
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Clinical Summary *</label>
+                        <textarea id="ref-pat-summary" rows="2" required placeholder="Detailed clinical summary and chief complaints..." class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none"></textarea>
+                    </div>
+                    <div class="sm:col-span-3 p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2.5">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                                <i class="fa-solid fa-heart-pulse text-rose-500"></i> Bedside Vitals (MEWS Scoring)
+                            </span>
+                            <span id="mews-badge-preview" class="hidden text-[10px] font-bold px-2 py-0.5 rounded-full uppercase"></span>
+                        </div>
+                        <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 text-xs">
+                            <div>
+                                <label class="text-[10px] text-slate-500 block">SBP (mmHg)</label>
+                                <input id="ref-vitals-sbp" type="number" oninput="triggerStaffAIFilter()" placeholder="120" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-500 block">HR (bpm)</label>
+                                <input id="ref-vitals-hr" type="number" oninput="triggerStaffAIFilter()" placeholder="80" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-500 block">RR (/min)</label>
+                                <input id="ref-vitals-rr" type="number" oninput="triggerStaffAIFilter()" placeholder="16" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-500 block">Temp (°C)</label>
+                                <input id="ref-vitals-temp" type="number" step="0.1" oninput="triggerStaffAIFilter()" placeholder="37.0" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-500 block">SpO2 (%)</label>
+                                <input id="ref-vitals-spo2" type="number" oninput="triggerStaffAIFilter()" placeholder="98" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-500 block">AVPU</label>
+                                <select id="ref-vitals-avpu" onchange="triggerStaffAIFilter()" class="w-full px-1.5 py-1.5 rounded-lg border border-slate-300 text-xs">
+                                    <option value="A">Alert</option>
+                                    <option value="V">Voice</option>
+                                    <option value="P">Pain</option>
+                                    <option value="U">Unresponsive</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="mews-alerts-container" class="hidden space-y-1"></div>
+                    </div>
+                </div>
+                <div class="flex justify-end pt-3">
+                    <button type="button" onclick="goToWizardStep(2)" class="px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-primary-600 hover:bg-primary-700 transition">Next: Requirements &rarr;</button>
+                </div>
+            </div>
+
+            <!-- STEP 2: Referral Requirements -->
+            <div id="wizard-step-2" class="space-y-4 hidden">
+                <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Step 2 — Required Medical Service & Specialty</h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Required Medical Service *</label>
+                        <select id="ref-service-select" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                            <option value="">Select Required Service...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Required Facility / Equipment</label>
+                        <select id="ref-facility-select" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                            <option value="">None / Standard</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Urgency Level *</label>
+                        <select id="ref-urgency-select" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm font-semibold focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                            <option value="ROUTINE">Routine</option>
+                            <option value="URGENT" selected>Urgent</option>
+                            <option value="EMERGENCY">Emergency (Life-Threatening)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Target Receiving Hospital (Optional)</label>
+                        <select id="ref-target-hospital-select" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                            <option value="">Let Coordinator / AI Recommend</option>
+                        </select>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Reason for Referral *</label>
+                        <input id="ref-reason" type="text" required placeholder="e.g. Local facility lacks cardiac catheterization lab" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                    </div>
+                </div>
+                <!-- Live AI Suggestions for Referring Staff -->
+                <div class="p-4 rounded-2xl bg-white border border-primary-100 shadow-sm space-y-2.5">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                        <span class="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                            <i class="fa-solid fa-wand-magic-sparkles text-primary-600"></i> AI Facility Recommendations (XGBoost)
+                        </span>
+                        <button type="button" onclick="triggerStaffAIFilter()" class="text-[11px] font-bold text-primary-600 hover:text-primary-700">
+                            <i class="fa-solid fa-rotate-right mr-1"></i> Refresh
+                        </button>
+                    </div>
+                    <div id="staff-ai-suggestions-list" class="space-y-2">
+                        <p class="text-center py-3 text-xs text-slate-400">Select required service and vitals to view matching facilities.</p>
+                    </div>
+                </div>
+                <div class="flex justify-between pt-3">
+                    <button type="button" onclick="goToWizardStep(1)" class="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition">&larr; Back</button>
+                    <button type="button" onclick="goToWizardStep(3)" class="px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-primary-600 hover:bg-primary-700 transition">Next: Supporting Documents &rarr;</button>
+                </div>
+            </div>
+
+            <!-- STEP 3: Supporting Information -->
+            <div id="wizard-step-3" class="space-y-4 hidden">
+                <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Step 3 — Supporting Clinical Records</h4>
+                <div class="p-6 bg-slate-50 border border-slate-200 rounded-2xl space-y-4">
+                    <p class="text-xs text-slate-600">You may attach supporting clinical documentation such as referral letters, medical summaries, or ECG/lab results. Files can also be uploaded after submission on the referral details page.</p>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Initial Document Attachment</label>
+                        <input type="file" id="ref-initial-file" class="w-full text-xs text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Document Category</label>
+                        <select id="ref-initial-doc-type" class="w-full px-4 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                            <option value="REFERRAL_LETTER">Referral Letter</option>
+                            <option value="MEDICAL_SUMMARY" selected>Medical Summary</option>
+                            <option value="LAB_RESULT">Laboratory Result</option>
+                            <option value="IMAGING_REPORT">Imaging / Diagnostic Report</option>
+                            <option value="OTHER">Other Clinical Document</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex justify-between pt-3">
+                    <button type="button" onclick="goToWizardStep(2)" class="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition">&larr; Back</button>
+                    <button type="button" onclick="populateWizardReview(); goToWizardStep(4);" class="px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-primary-600 hover:bg-primary-700 transition">Next: Review & Confirm &rarr;</button>
+                </div>
+            </div>
+
+            <!-- STEP 4: Review Summary -->
+            <div id="wizard-step-4" class="space-y-4 hidden">
+                <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Step 4 — Review Referral Before Submission</h4>
+                <div class="p-5 bg-slate-50 border border-slate-200 rounded-2xl space-y-3 text-xs">
+                    <div class="grid grid-cols-2 gap-3 pb-3 border-b border-slate-200">
+                        <div>
+                            <span class="font-bold text-slate-400 uppercase text-[10px]">Patient Name</span>
+                            <p id="rev-patient-name" class="font-bold text-slate-900 text-sm mt-0.5">--</p>
+                        </div>
+                        <div>
+                            <span class="font-bold text-slate-400 uppercase text-[10px]">Age / Sex / Urgency</span>
+                            <p id="rev-patient-meta" class="font-semibold text-slate-800 mt-0.5">--</p>
+                        </div>
+                        <div class="col-span-2">
+                            <span class="font-bold text-slate-400 uppercase text-[10px]">Condition & Reason</span>
+                            <p id="rev-condition-reason" class="font-semibold text-slate-900 mt-0.5">--</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <span class="font-bold text-slate-400 uppercase text-[10px]">Required Service</span>
+                            <p id="rev-service" class="font-bold text-primary-700 mt-0.5">--</p>
+                        </div>
+                        <div>
+                            <span class="font-bold text-slate-400 uppercase text-[10px]">Target Destination</span>
+                            <p id="rev-destination" class="font-semibold text-slate-800 mt-0.5">AI / Coordinator Match</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="create-ref-error" class="hidden p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 font-medium"></div>
+
+                <div class="flex justify-between items-center pt-3 border-t border-slate-100">
+                    <button type="button" onclick="goToWizardStep(3)" class="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition">&larr; Back</button>
+                    <div class="flex gap-2">
+                        <button type="button" onclick="saveReferralAsDraft()" class="px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition">Save Draft</button>
+                        <button type="submit" id="ref-submit-btn" class="px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-primary-600 hover:bg-primary-700 shadow-md transition">Submit Referral</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Review Incoming Referral Action Modal -->
+<div id="review-action-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-slate-200">
+        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+            <h3 class="text-lg font-bold text-slate-900">Review Incoming Referral</h3>
+            <button onclick="closeReviewModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div id="review-modal-content" class="space-y-4 text-sm text-slate-700"></div>
+
+        <div class="space-y-3 pt-2 border-t border-slate-100">
+            <div id="rejection-reason-box" class="hidden space-y-2">
+                <label class="block text-xs font-semibold text-rose-700 mb-1">Reason for Rejection *</label>
+                <textarea id="rejection-reason-text" rows="2" placeholder="e.g. Bed capacity at maximum; ICU occupied." class="w-full px-3 py-2 rounded-xl border border-rose-300 text-xs focus:ring-2 focus:ring-rose-500 focus:outline-none"></textarea>
+                <button onclick="performReferralAction('REJECTED')" class="w-full px-4 py-2 rounded-xl text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 transition">
+                    <i class="fa-solid fa-circle-xmark mr-1"></i> Confirm Rejection
+                </button>
+            </div>
+            <div id="more-info-box" class="hidden space-y-2">
+                <label class="block text-xs font-semibold text-amber-700 mb-1">Required Information Notes *</label>
+                <textarea id="more-info-text" rows="2" placeholder="e.g. Please attach latest blood gas analysis (ABG) report." class="w-full px-3 py-2 rounded-xl border border-amber-300 text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none"></textarea>
+                <button onclick="performReferralAction('MORE_INFORMATION_REQUIRED')" class="w-full px-4 py-2 rounded-xl text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 transition">
+                    <i class="fa-solid fa-paper-plane mr-1"></i> Send Information Request
+                </button>
+            </div>
+
+            <div class="flex flex-wrap gap-2 justify-end">
+                <button onclick="performReferralAction('ACCEPTED')" class="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-teal-600 hover:bg-teal-700 shadow-md">Accept Patient</button>
+                <button onclick="toggleMoreInfoBox()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-amber-800 bg-amber-100 hover:bg-amber-200">Request Info</button>
+                <button onclick="toggleRejectionBox()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-rose-800 bg-rose-100 hover:bg-rose-200">Reject</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        requireRole('STAFF');
+        loadStaffDashboardData();
+        const p = new URLSearchParams(window.location.search);
+        const t = p.get('tab');
+        if (t) switchStaffTab(t);
+        const a = p.get('action');
+        if (a === 'new_referral') setTimeout(openNewReferralModal, 300);
+        if (a === 'update_capacity') setTimeout(openCapacityModal, 300);
+        if (a === 'new_staff') {
+            switchStaffTab('team');
+            setTimeout(openNewStaffModal, 300);
+        }
+    });
+</script>
+{% endblock %}

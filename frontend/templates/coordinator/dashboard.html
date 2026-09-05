@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% block title %}Regional Coordinator Command Center — CareLink{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-5">
+        <div>
+            <span class="text-xs font-bold text-amber-600 uppercase tracking-wider">Regional Situational Command</span>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-0.5">Regional Triage & Routing Command</h1>
+            <p class="text-xs text-slate-500 mt-1">Real-time network visibility, triage intake volume, bed capacity telemetry, and rapid decision support</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <a href="/coordinator/matcher/" class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-primary-600 hover:bg-primary-700 shadow-sm transition flex items-center gap-1.5">
+                <i class="fa-solid fa-brain"></i> Open XGBoost Matcher
+            </a>
+            <button onclick="refreshCoordinatorCommandOverview(this)" class="px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition shadow-sm flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-solid fa-rotate text-primary-600"></i> Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- KPI Metric Overview Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+        <div class="p-5 rounded-3xl bg-white border border-slate-200 shadow-sm hover:border-slate-300 transition">
+            <div class="flex items-center justify-between">
+                <p class="text-xs font-bold text-slate-500 uppercase">Pending Triage</p>
+                <span class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-sm"><i class="fa-solid fa-hourglass-half"></i></span>
+            </div>
+            <p id="coord-kpi-pending" class="text-3xl font-black text-amber-600 mt-2">--</p>
+            <a href="/coordinator/matcher/" class="text-xs text-amber-600 hover:underline font-semibold mt-1 inline-block">Route pending cases &rarr;</a>
+        </div>
+
+        <div class="p-5 rounded-3xl bg-white border border-slate-200 shadow-sm hover:border-slate-300 transition">
+            <div class="flex items-center justify-between">
+                <p class="text-xs font-bold text-slate-500 uppercase">Critical / Emergency</p>
+                <span class="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-sm"><i class="fa-solid fa-triangle-exclamation"></i></span>
+            </div>
+            <p id="coord-kpi-emergencies" class="text-3xl font-black text-rose-600 mt-2">--</p>
+            <a href="/coordinator/emergency/" class="text-xs text-rose-600 hover:underline font-semibold mt-1 inline-block">Review critical cases &rarr;</a>
+        </div>
+
+        <div class="p-5 rounded-3xl bg-white border border-slate-200 shadow-sm hover:border-slate-300 transition">
+            <div class="flex items-center justify-between">
+                <p class="text-xs font-bold text-slate-500 uppercase">En Route Transports</p>
+                <span class="w-8 h-8 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center text-sm"><i class="fa-solid fa-truck-medical"></i></span>
+            </div>
+            <p id="coord-kpi-transfers" class="text-3xl font-black text-primary-700 mt-2">--</p>
+            <a href="/coordinator/transfers/" class="text-xs text-primary-600 hover:underline font-semibold mt-1 inline-block">Track fleet telemetry &rarr;</a>
+        </div>
+
+        <div class="p-5 rounded-3xl bg-white border border-slate-200 shadow-sm hover:border-slate-300 transition">
+            <div class="flex items-center justify-between">
+                <p class="text-xs font-bold text-slate-500 uppercase">Network ICU Vacancy</p>
+                <span class="w-8 h-8 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center text-sm"><i class="fa-solid fa-bed-pulse"></i></span>
+            </div>
+            <p id="coord-kpi-icu" class="text-3xl font-black text-teal-600 mt-2">--</p>
+            <a href="/coordinator/capacity/" class="text-xs text-teal-600 hover:underline font-semibold mt-1 inline-block">Inspect capacity matrix &rarr;</a>
+        </div>
+    </div>
+
+    <!-- Regional Command Grids: Pending Queue & Network Capacity Snapshot -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <!-- Left: Incoming Referrals Needing Action -->
+        <div class="lg:col-span-7 bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-inbox text-amber-600"></i> New Incoming Unrouted Referrals
+                </h3>
+                <a href="/coordinator/matcher/" class="text-xs font-bold text-primary-600 hover:underline">Match in AI Workbench &rarr;</a>
+            </div>
+            <div id="coord-dash-incoming-list" class="divide-y divide-slate-100 max-h-[460px] overflow-y-auto flex-1">
+                <p class="text-center py-12 text-slate-400 text-xs">Loading referrals queue...</p>
+            </div>
+        </div>
+
+        <!-- Right: Real-time Bed Availability Snapshot -->
+        <div class="lg:col-span-5 bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-hospital text-teal-600"></i> Hospital Capacity Telemetry
+                </h3>
+                <a href="/coordinator/capacity/" class="text-xs font-bold text-teal-600 hover:underline">Full Matrix &rarr;</a>
+            </div>
+            <div id="coord-dash-capacity-list" class="divide-y divide-slate-100 max-h-[460px] overflow-y-auto flex-1">
+                <p class="text-center py-12 text-slate-400 text-xs">Loading hospital telemetry...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Tool Suites -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <!-- Card 1: AI Decision Engine -->
+        <div class="p-6 rounded-3xl bg-white border border-slate-200 hover:border-brand-300 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+            <div>
+                <span class="text-[10px] font-extrabold uppercase tracking-wider text-brand-600 block">AI Decision Engine</span>
+                <h4 class="text-lg font-bold text-slate-900 mt-1">XGBoost Hospital Matcher</h4>
+                <p class="text-xs text-slate-500 mt-1 leading-relaxed">Multi-factor compatibility ranker incorporating MEWS severity, road travel times, and in-transit congestion.</p>
+            </div>
+            <div class="pt-4 mt-4 border-t border-slate-100">
+                <a href="/coordinator/matcher/" class="inline-flex items-center gap-2 text-xs font-bold text-brand-600 hover:text-brand-700 transition">
+                    <span>Open AI Matcher</span> <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Card 2: Rapid Response -->
+        <div class="p-6 rounded-3xl bg-white border border-slate-200 hover:border-rose-300 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+            <div>
+                <span class="text-[10px] font-extrabold uppercase tracking-wider text-rose-600 block">Rapid Response</span>
+                <h4 class="text-lg font-bold text-slate-900 mt-1">Emergency Triage Board</h4>
+                <p class="text-xs text-slate-500 mt-1 leading-relaxed">Dedicated console filtering life-threatening transfers and unstable MEWS cases requiring immediate dispatch.</p>
+            </div>
+            <div class="pt-4 mt-4 border-t border-slate-100">
+                <a href="/coordinator/emergency/" class="inline-flex items-center gap-2 text-xs font-bold text-rose-600 hover:text-rose-700 transition">
+                    <span>Open Emergency Queue</span> <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Card 3: Historical Archives -->
+        <div class="p-6 rounded-3xl bg-white border border-slate-200 hover:border-teal-300 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+            <div>
+                <span class="text-[10px] font-extrabold uppercase tracking-wider text-teal-600 block">Historical Archives</span>
+                <h4 class="text-lg font-bold text-slate-900 mt-1">Regional Referrals Registry</h4>
+                <p class="text-xs text-slate-500 mt-1 leading-relaxed">Searchable database of all historical and active patient transfers across the network.</p>
+            </div>
+            <div class="pt-4 mt-4 border-t border-slate-100">
+                <a href="/coordinator/history/" class="inline-flex items-center gap-2 text-xs font-bold text-teal-600 hover:text-teal-700 transition">
+                    <span>Open Registry</span> <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        requireRole('COORDINATOR');
+        loadCoordinatorCommandOverview();
+    });
+</script>
+{% endblock %}

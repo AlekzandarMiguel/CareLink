@@ -1,0 +1,272 @@
+{% extends 'base.html' %}
+{% block title %}Referral Details — CareLink{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-5">
+        <div>
+            <div class="flex items-center gap-3">
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900" id="detail-ref-code">REF-XXXX-XXXX</h1>
+                <span id="detail-status-badge" class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-slate-100 text-slate-700">Loading...</span>
+                <span id="detail-urgency-badge" class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-800">Urgency</span>
+            </div>
+            <p class="text-xs text-slate-500 mt-1">Created on <span id="detail-created-at">--</span> by <span id="detail-created-by">--</span></p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button onclick="printSbarClinicalHandover()" class="px-4 py-2 rounded-xl text-sm font-bold bg-brand-600 text-white hover:bg-brand-700 transition shadow-sm flex items-center gap-2 cursor-pointer">
+                <i class="fa-solid fa-file-medical"></i> Print SBAR Handover
+            </button>
+            <button onclick="window.history.back()" class="px-4 py-2 rounded-xl text-sm font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition shadow-sm cursor-pointer">
+                <i class="fa-solid fa-arrow-left mr-1.5"></i> Back to Dashboard
+            </button>
+        </div>
+    </div>
+
+    <!-- Main 2-Column Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <!-- Left: Clinical Info & Documents -->
+        <div class="lg:col-span-8 space-y-6">
+            <!-- Patient Card -->
+            <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-4">
+                <h3 class="text-base font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
+                    <i class="fa-solid fa-user-injured text-primary-600"></i> Patient Clinical Details
+                </h3>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
+                    <div>
+                        <p class="text-xs text-slate-400 font-semibold uppercase">Patient Name</p>
+                        <p id="detail-pat-name" class="font-bold text-slate-900 mt-0.5">--</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400 font-semibold uppercase">Age / Sex</p>
+                        <p id="detail-pat-age-sex" class="font-semibold text-slate-800 mt-0.5">--</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400 font-semibold uppercase">Patient Ref No.</p>
+                        <p id="detail-pat-refno" class="font-mono text-xs text-slate-600 mt-0.5">--</p>
+                    </div>
+                    <div class="col-span-2 sm:col-span-3">
+                        <p class="text-xs text-slate-400 font-semibold uppercase">Current Diagnosis / Condition</p>
+                        <p id="detail-pat-condition" class="font-bold text-slate-900 mt-0.5">--</p>
+                    </div>
+                    <div class="col-span-2 sm:col-span-3">
+                        <p class="text-xs text-slate-400 font-semibold uppercase">Reason for Referral</p>
+                        <p id="detail-reason" class="font-bold text-slate-900 mt-0.5">--</p>
+                    </div>
+                    <div class="col-span-2 sm:col-span-3">
+                        <p class="text-xs text-slate-400 font-semibold uppercase">Clinical Summary</p>
+                        <div id="detail-pat-summary" class="p-4 rounded-2xl bg-slate-50 border border-slate-100 text-slate-700 text-xs leading-relaxed mt-1 whitespace-pre-wrap">--</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Routing & Requirements Card -->
+            <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-4">
+                <h3 class="text-base font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
+                    <i class="fa-solid fa-hospital-user text-teal-600"></i> Referral Routing & Capabilities
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <p class="text-xs text-slate-400 font-semibold uppercase">Requesting Hospital</p>
+                        <p id="detail-req-hosp" class="font-bold text-slate-900 mt-0.5">--</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400 font-semibold uppercase">Receiving Hospital</p>
+                        <p id="detail-rec-hosp" class="font-bold text-teal-700 mt-0.5">Not Assigned Yet</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400 font-semibold uppercase">Required Medical Service</p>
+                        <p id="detail-service" class="font-semibold text-slate-800 mt-0.5">--</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400 font-semibold uppercase">Required Facility</p>
+                        <p id="detail-facility" class="font-semibold text-slate-800 mt-0.5">Standard / None</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Documents Card -->
+            <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-4">
+                <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                    <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-file-medical text-blue-600"></i> Supporting Clinical Documents
+                    </h3>
+                    <label class="cursor-pointer px-3.5 py-1.5 rounded-xl text-xs font-bold text-primary-700 bg-primary-50 hover:bg-primary-100 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-upload"></i> Upload File
+                        <input type="file" id="doc-upload-input" onchange="uploadReferralDocument(event)" class="hidden">
+                    </label>
+                </div>
+                <div id="detail-documents-list" class="space-y-2">
+                    <p class="text-xs text-slate-400 text-center py-4">No documents attached yet.</p>
+                </div>
+            </div>
+
+            <!-- Clinical Case Discussion & Notes -->
+            <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-5">
+                <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-comments text-brand-600"></i> Clinical Case Discussion & Notes
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Secure, audit-logged inter-hospital communication between referring and receiving teams</p>
+                    </div>
+                    <span id="discussion-count-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700">0 notes</span>
+                </div>
+
+                <!-- Messages Stream -->
+                <div id="case-messages-stream" class="space-y-3 max-h-96 overflow-y-auto pr-2">
+                    <p class="text-xs text-slate-400 text-center py-4">No notes recorded yet. Start the clinical discussion below.</p>
+                </div>
+
+                <!-- Note Composer -->
+                <form id="case-message-form" onsubmit="submitCaseMessage(event)" class="space-y-3 pt-3 border-t border-slate-100">
+                    <div>
+                        <textarea id="case-message-input" rows="3" required placeholder="Type clinical note, lab update, or question for receiving/referring team..." class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none resize-none"></textarea>
+                    </div>
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                        <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
+                            <input type="checkbox" id="case-message-urgent" class="rounded text-rose-600 focus:ring-rose-500 w-4 h-4">
+                            <span class="text-rose-600 flex items-center gap-1"><i class="fa-solid fa-triangle-exclamation"></i> Mark as Urgent Clinical Alert</span>
+                        </label>
+                        <button type="submit" id="btn-post-note" class="px-5 py-2 rounded-xl text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 transition shadow-sm flex items-center gap-2 cursor-pointer">
+                            <i class="fa-solid fa-paper-plane"></i> Post Clinical Note
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Right: Status Timeline & Actions -->
+        <div class="lg:col-span-4 space-y-6">
+            <!-- Action Panel -->
+            <div id="detail-action-panel" class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4 hidden">
+                <h3 class="text-base font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
+                    <i class="fa-solid fa-clipboard-check text-primary-600"></i> Action Required
+                </h3>
+                <p class="text-xs text-slate-600">Please review the clinical details and routing requirements to accept or reject this referral.</p>
+                <div class="space-y-2">
+                    <button onclick="performDetailPageAction('ACCEPTED')" class="w-full px-4 py-2 rounded-xl text-sm font-bold text-white bg-teal-600 hover:bg-teal-700 transition shadow-sm">Accept Referral</button>
+                    <button onclick="performDetailPageAction('REJECTED')" class="w-full px-4 py-2 rounded-xl text-sm font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 transition shadow-sm">Reject Referral</button>
+                    <button onclick="performDetailPageAction('MORE_INFORMATION_REQUIRED')" class="w-full px-4 py-2 rounded-xl text-sm font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 transition shadow-sm">Request More Info</button>
+                </div>
+            </div>
+
+            <!-- Transfer Tracking Card -->
+            <div id="detail-transfer-card" class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4 hidden">
+                <h3 class="text-base font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
+                    <i class="fa-solid fa-truck-medical text-rose-600"></i> Transfer Tracking
+                </h3>
+                <div id="detail-transfer-content" class="space-y-4">
+                    <p class="text-slate-400 text-xs">Loading transfer details...</p>
+                </div>
+            </div>
+
+            <!-- Timeline Card -->
+            <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4">
+                <h3 class="text-base font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
+                    <i class="fa-solid fa-timeline text-amber-500"></i> Referral Timeline
+                </h3>
+                <div id="detail-timeline-list" class="space-y-4 relative border-l-2 border-slate-200 ml-3 pl-5 text-xs">
+                    <p class="text-slate-400">Loading timeline...</p>
+                </div>
+            </div>
+    <!-- Printable SBAR Clinical Handover Sheet -->
+    <div id="sbar-printable-sheet" class="hidden print:block fixed inset-0 bg-white text-slate-900 p-8 z-[9999] overflow-y-auto">
+        <div class="max-w-4xl mx-auto space-y-6 text-sm font-sans border-2 border-slate-900 p-8 rounded-xl bg-white">
+            <!-- Header -->
+            <div class="flex justify-between items-start border-b-2 border-slate-900 pb-4">
+                <div>
+                    <h1 class="text-2xl font-black tracking-tight uppercase text-slate-900">CareLink Health System</h1>
+                    <p class="text-xs font-bold text-slate-600 uppercase">Inter-Hospital Patient Handover Form (SBAR Protocol)</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs font-mono font-bold" id="sbar-print-ref">REF-XXXX-XXXX</p>
+                    <p class="text-xs text-slate-500 font-semibold" id="sbar-print-date">Date: --</p>
+                    <span id="sbar-print-urgency" class="inline-block mt-1 px-3 py-0.5 rounded font-black text-xs uppercase border border-slate-900">URGENT</span>
+                </div>
+            </div>
+
+            <!-- S: Situation -->
+            <div class="border border-slate-300 rounded-lg p-4 space-y-2">
+                <h2 class="text-xs font-black uppercase tracking-wider bg-slate-900 text-white px-2 py-1 rounded inline-block">S — Situation</h2>
+                <div class="grid grid-cols-3 gap-3 text-xs">
+                    <div><span class="font-bold text-slate-600">Patient:</span> <span id="sbar-pat-name" class="font-black text-slate-900">--</span></div>
+                    <div><span class="font-bold text-slate-600">Age / Sex:</span> <span id="sbar-pat-age-sex" class="font-bold">--</span></div>
+                    <div><span class="font-bold text-slate-600">Patient ID:</span> <span id="sbar-pat-refno" class="font-mono">--</span></div>
+                </div>
+                <div class="text-xs pt-1">
+                    <span class="font-bold text-slate-600">Primary Reason for Referral:</span>
+                    <p id="sbar-reason" class="font-semibold text-slate-900 mt-0.5">--</p>
+                </div>
+            </div>
+
+            <!-- B: Background -->
+            <div class="border border-slate-300 rounded-lg p-4 space-y-2">
+                <h2 class="text-xs font-black uppercase tracking-wider bg-slate-900 text-white px-2 py-1 rounded inline-block">B — Background</h2>
+                <div class="grid grid-cols-2 gap-3 text-xs">
+                    <div><span class="font-bold text-slate-600">Referring Facility:</span> <span id="sbar-req-hosp" class="font-bold">--</span></div>
+                    <div><span class="font-bold text-slate-600">Referring Clinician:</span> <span id="sbar-created-by" class="font-bold">--</span></div>
+                </div>
+                <div class="text-xs">
+                    <span class="font-bold text-slate-600">Diagnosis / Clinical Condition:</span>
+                    <p id="sbar-condition" class="font-bold text-slate-900 mt-0.5">--</p>
+                </div>
+                <div class="text-xs">
+                    <span class="font-bold text-slate-600">Clinical Summary & Vitals:</span>
+                    <p id="sbar-summary" class="text-slate-800 mt-0.5 leading-relaxed bg-slate-50 p-2.5 rounded border border-slate-200">--</p>
+                </div>
+            </div>
+
+            <!-- A: Assessment -->
+            <div class="border border-slate-300 rounded-lg p-4 space-y-2">
+                <h2 class="text-xs font-black uppercase tracking-wider bg-slate-900 text-white px-2 py-1 rounded inline-block">A — Assessment</h2>
+                <div class="grid grid-cols-3 gap-3 text-xs">
+                    <div><span class="font-bold text-slate-600">Required Specialty:</span> <span id="sbar-spec" class="font-bold">--</span></div>
+                    <div><span class="font-bold text-slate-600">Service:</span> <span id="sbar-service" class="font-bold">--</span></div>
+                    <div><span class="font-bold text-slate-600">Facility Level:</span> <span id="sbar-facility" class="font-bold">--</span></div>
+                </div>
+                <div class="text-xs">
+                    <span class="font-bold text-slate-600">Additional Clinical Requirements:</span>
+                    <p id="sbar-requirements" class="font-semibold text-slate-800 mt-0.5">None specified</p>
+                </div>
+            </div>
+
+            <!-- R: Recommendation & Logistics -->
+            <div class="border border-slate-300 rounded-lg p-4 space-y-2">
+                <h2 class="text-xs font-black uppercase tracking-wider bg-slate-900 text-white px-2 py-1 rounded inline-block">R — Recommendation & Transfer Logistics</h2>
+                <div class="grid grid-cols-2 gap-3 text-xs">
+                    <div><span class="font-bold text-slate-600">Receiving Destination:</span> <span id="sbar-rec-hosp" class="font-black text-slate-900">--</span></div>
+                    <div><span class="font-bold text-slate-600">Transport Unit:</span> <span id="sbar-vehicle" class="font-bold">--</span></div>
+                    <div><span class="font-bold text-slate-600">Assigned Paramedic:</span> <span id="sbar-paramedic" class="font-bold">--</span></div>
+                    <div><span class="font-bold text-slate-600">Transfer Status:</span> <span id="sbar-status" class="font-bold uppercase">--</span></div>
+                </div>
+            </div>
+
+            <!-- Signatures Section -->
+            <div class="pt-6 border-t-2 border-slate-900 grid grid-cols-3 gap-6 text-xs text-center">
+                <div class="space-y-10">
+                    <div class="border-b border-slate-400 pb-1"></div>
+                    <p class="font-bold text-slate-800">Referring Clinician Signature</p>
+                    <p class="text-[10px] text-slate-400">Date & Time</p>
+                </div>
+                <div class="space-y-10">
+                    <div class="border-b border-slate-400 pb-1"></div>
+                    <p class="font-bold text-slate-800">Transport Paramedic / EMT</p>
+                    <p class="text-[10px] text-slate-400">Date & Time</p>
+                </div>
+                <div class="space-y-10">
+                    <div class="border-b border-slate-400 pb-1"></div>
+                    <p class="font-bold text-slate-800">Receiving Triage Nurse</p>
+                    <p class="text-[10px] text-slate-400">Date & Time</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        loadReferralDetailPage();
+    });
+</script>
+{% endblock %}

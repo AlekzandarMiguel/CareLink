@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block title %}Regional Referrals Registry — CareLink{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-5">
+        <div>
+            <span class="text-xs font-bold text-amber-600 uppercase tracking-wider">Regional Triage Archives</span>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-0.5">Regional Referrals & Case Registry</h1>
+            <p class="text-xs text-slate-500 mt-1">Audit, monitor, and review all network patient transfer requests across stages</p>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="refreshCoordinatorHistory(this)" class="px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition shadow-sm flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-solid fa-rotate text-primary-600"></i> Refresh Registry
+            </button>
+        </div>
+    </div>
+
+    <!-- Filter & Search Bar -->
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-4 bg-slate-50 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex flex-wrap items-center gap-2">
+                <div class="relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <input type="text" id="coord-hist-search" onkeyup="filterCoordinatorHistory()" placeholder="Search code, patient, hospital..." class="pl-9 pr-4 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none w-64">
+                </div>
+                <select id="coord-hist-status" onchange="filterCoordinatorHistory()" class="px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                    <option value="">All Statuses</option>
+                    <option value="SUBMITTED">Submitted (Pending Triage)</option>
+                    <option value="UNDER_REVIEW">Under Review</option>
+                    <option value="ACCEPTED">Accepted</option>
+                    <option value="IN_TRANSIT">In Transit</option>
+                    <option value="COMPLETED">Completed</option>
+                    <option value="REJECTED">Rejected</option>
+                </select>
+                <select id="coord-hist-urgency" onchange="filterCoordinatorHistory()" class="px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                    <option value="">All Urgencies</option>
+                    <option value="ROUTINE">Routine</option>
+                    <option value="URGENT">Urgent</option>
+                    <option value="EMERGENCY">Emergency</option>
+                </select>
+            </div>
+            <span class="text-xs text-slate-500 font-medium">Regional Registry: <strong id="coord-hist-count" class="text-slate-800">0</strong> cases</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 text-slate-600 text-xs uppercase font-semibold border-b border-slate-100">
+                    <tr>
+                        <th class="px-6 py-3.5">Referral Code</th>
+                        <th class="px-6 py-3.5">Patient / Diagnosis</th>
+                        <th class="px-6 py-3.5">Requesting Facility</th>
+                        <th class="px-6 py-3.5">Receiving Facility</th>
+                        <th class="px-6 py-3.5">Urgency</th>
+                        <th class="px-6 py-3.5">Status</th>
+                        <th class="px-6 py-3.5 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="coord-history-tbody" class="divide-y divide-slate-100">
+                    <tr><td colspan="7" class="px-6 py-8 text-center text-slate-400">Loading case registry...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        requireRole('COORDINATOR');
+        loadCoordinatorHistory();
+    });
+</script>
+{% endblock %}

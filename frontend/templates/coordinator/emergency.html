@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% block title %}Emergency Triage Console — CareLink{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-rose-200 pb-5">
+        <div>
+            <div class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-rose-600 animate-ping"></span>
+                <span class="text-xs font-bold text-rose-600 uppercase tracking-wider">Priority Red Critical Care Triage</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">Emergency & High-MEWS Triage Console</h1>
+            <p class="text-xs text-slate-500 mt-1">Dedicated rapid-routing workspace for life-threatening cases, critical MEWS vitals, and emergency transfers</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button onclick="refreshCoordinatorEmergency(this)" class="px-4 py-2 rounded-xl text-xs font-bold bg-white border border-rose-200 text-rose-700 hover:bg-rose-50 transition shadow-sm flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-solid fa-rotate text-rose-600"></i> Refresh Critical Queue
+            </button>
+        </div>
+    </div>
+
+    <!-- Emergency Severity Stat Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+        <div class="bg-rose-50/80 border border-rose-200 p-5 rounded-3xl flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-rose-600 text-white flex items-center justify-center text-xl shadow-md shadow-rose-600/30">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div>
+                <p class="text-xs font-bold text-rose-800 uppercase tracking-wide">Active Emergency Referrals</p>
+                <p id="emer-count-total" class="text-3xl font-black text-rose-900 mt-0.5">0</p>
+            </div>
+        </div>
+
+        <div class="bg-amber-50/80 border border-amber-200 p-5 rounded-3xl flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center text-xl shadow-md shadow-amber-500/30">
+                <i class="fa-solid fa-heart-pulse"></i>
+            </div>
+            <div>
+                <p class="text-xs font-bold text-amber-800 uppercase tracking-wide">Critical / High MEWS Patients</p>
+                <p id="emer-count-mews" class="text-3xl font-black text-amber-900 mt-0.5">0</p>
+            </div>
+        </div>
+
+        <div class="bg-emerald-50/80 border border-emerald-200 p-5 rounded-3xl flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center text-xl shadow-md shadow-emerald-600/30">
+                <i class="fa-solid fa-hospital-user"></i>
+            </div>
+            <div>
+                <p class="text-xs font-bold text-emerald-800 uppercase tracking-wide">Network Open ICU Beds</p>
+                <p id="emer-open-icu" class="text-3xl font-black text-emerald-900 mt-0.5">--</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Critical Triage Queue -->
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+            <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                <i class="fa-solid fa-bell text-rose-600"></i> Urgent & Emergency Referrals Requiring Immediate Action
+            </h3>
+            <span class="text-xs font-medium text-slate-500">Auto-prioritized by MEWS & Urgency Level</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 text-slate-600 text-xs uppercase font-semibold border-b border-slate-100">
+                    <tr>
+                        <th class="px-6 py-3.5">Priority Code</th>
+                        <th class="px-6 py-3.5">Patient / Clinical Condition</th>
+                        <th class="px-6 py-3.5">Requesting Hospital</th>
+                        <th class="px-6 py-3.5">Required Service</th>
+                        <th class="px-6 py-3.5">Severity / MEWS</th>
+                        <th class="px-6 py-3.5">Status</th>
+                        <th class="px-6 py-3.5 text-right">Immediate Action</th>
+                    </tr>
+                </thead>
+                <tbody id="coord-emergency-tbody" class="divide-y divide-slate-100">
+                    <tr><td colspan="7" class="px-6 py-8 text-center text-slate-400">Scanning for emergency referrals...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        requireRole('COORDINATOR');
+        loadCoordinatorEmergencyQueue();
+    });
+</script>
+{% endblock %}

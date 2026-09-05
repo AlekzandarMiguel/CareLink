@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% block title %}Hospital Staff Settings & Preferences — CareLink{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-5">
+        <div>
+            <div class="text-xs font-bold text-teal-600 uppercase tracking-wider mb-1">
+                <i class="fa-solid fa-user-doctor mr-1"></i> Clinical Account & Preferences
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Hospital & Staff Settings</h1>
+            <p class="text-xs text-slate-500 mt-1">Manage personal profile details, notification preferences, and account security</p>
+        </div>
+        <a href="/staff-dashboard/" class="px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition shadow-sm flex items-center gap-1.5">
+            <i class="fa-solid fa-arrow-left"></i> Clinical Dashboard
+        </a>
+    </div>
+
+    <!-- User Profile Overview Card -->
+    <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+            <div class="w-14 h-14 rounded-2xl bg-teal-50 border border-teal-200 text-teal-600 flex items-center justify-center text-2xl flex-shrink-0">
+                <i class="fa-solid fa-user-doctor"></i>
+            </div>
+            <div>
+                <h3 class="text-base font-bold text-slate-900" id="profile-display-name">Hospital Staff User</h3>
+                <p class="text-xs text-slate-500" id="profile-display-email">staff@carelink.local</p>
+                <div class="flex items-center gap-2 mt-1">
+                    <span class="text-xs font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-md border border-teal-200/60" id="profile-display-hospital">Hospital Affiliation</span>
+                    <span class="text-[11px] font-semibold text-slate-400">CLINICAL STAFF</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Sections -->
+    <div class="space-y-6">
+        <!-- Change Password Card -->
+        <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-6">
+            <div class="border-b border-slate-100 pb-4 flex items-center justify-between">
+                <div>
+                    <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-key text-teal-600"></i> Change Account Password
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Ensure your account uses a secure, non-reused password</p>
+                </div>
+            </div>
+
+            <form id="change-pwd-form" onsubmit="handleUserPasswordChange(event)" class="space-y-4 max-w-xl">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Current Password *</label>
+                    <input type="password" id="current-pwd" required placeholder="Enter current password" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">New Password *</label>
+                        <input type="password" id="new-pwd" minlength="6" required placeholder="Minimum 6 characters" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Confirm New Password *</label>
+                        <input type="password" id="confirm-pwd" minlength="6" required placeholder="Re-type new password" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                    </div>
+                </div>
+                <div class="pt-2">
+                    <button type="submit" id="change-pwd-btn" class="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-primary-600 hover:bg-primary-700 transition shadow-sm flex items-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-lock"></i> Update Password
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Clinical Notification Preferences -->
+        <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-6">
+            <div class="border-b border-slate-100 pb-4">
+                <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-bell text-teal-600"></i> Clinical Notification Preferences
+                </h3>
+                <p class="text-xs text-slate-500 mt-0.5">Customize real-time alerts for incoming referrals and ambulance milestones</p>
+            </div>
+
+            <div class="space-y-3 max-w-2xl">
+                <label class="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-100 cursor-pointer">
+                    <div>
+                        <span class="font-bold text-xs text-slate-800 block">Immediate Urgent Referral Audio Chimes</span>
+                        <span class="text-[11px] text-slate-400">Play an audible chime when emergency transfers are targeted to your facility</span>
+                    </div>
+                    <input type="checkbox" checked class="w-4 h-4 text-teal-600 rounded border-slate-300 focus:ring-teal-500">
+                </label>
+                <label class="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-100 cursor-pointer">
+                    <div>
+                        <span class="font-bold text-xs text-slate-800 block">Ambulance Transit Milestone Alerts</span>
+                        <span class="text-[11px] text-slate-400">Notify ward staff when incoming ambulances depart origin facility or approach ER</span>
+                    </div>
+                    <input type="checkbox" checked class="w-4 h-4 text-teal-600 rounded border-slate-300 focus:ring-teal-500">
+                </label>
+                <label class="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-100 cursor-pointer">
+                    <div>
+                        <span class="font-bold text-xs text-slate-800 block">Critical Bed Capacity Broadcast Warnings</span>
+                        <span class="text-[11px] text-slate-400">Notify clinical supervisors when ICU bed vacancy drops below 10%</span>
+                    </div>
+                    <input type="checkbox" checked class="w-4 h-4 text-teal-600 rounded border-slate-300 focus:ring-teal-500">
+                </label>
+            </div>
+
+            <div class="pt-2">
+                <button onclick="showToast('Clinical notification preferences saved!')" class="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-teal-600 hover:bg-teal-700 transition shadow-sm flex items-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-check"></i> Save Preferences
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    requireRole('STAFF');
+    loadUserSettingsPage();
+});
+</script>
+{% endblock %}

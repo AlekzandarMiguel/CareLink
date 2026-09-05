@@ -1,0 +1,315 @@
+{% extends 'base.html' %}
+{% block title %}Sign in to System — CareLink{% endblock %}
+
+{% block header %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<script>
+    (function() {
+        try {
+            const raw = localStorage.getItem('carelink_user');
+            if (raw) {
+                const u = JSON.parse(raw);
+                if (u && u.role) {
+                    let d = '/staff-dashboard/';
+                    if (u.role === 'ADMIN') d = '/admin-dashboard/';
+                    else if (u.role === 'COORDINATOR') d = '/coordinator-dashboard/';
+                    else if (u.role === 'DISPATCHER') d = '/dispatcher-dashboard/';
+                    window.location.replace(d);
+                }
+            }
+        } catch(e) {}
+    })();
+</script>
+
+<div class="min-h-screen flex flex-col lg:flex-row bg-slate-50 font-sans antialiased selection:bg-teal-600 selection:text-white">
+
+    <!-- LEFT SIDE: Healthcare Telemetry & Referral Platform Hero -->
+    <div class="w-full lg:w-1/2 bg-gradient-to-b from-teal-700 via-teal-800 to-slate-900 text-white flex flex-col justify-between items-center text-center p-8 sm:p-12 lg:p-16 relative overflow-hidden min-h-[480px] lg:min-h-screen">
+        
+
+        <!-- Top Back Link -->
+        <div class="w-full flex justify-start z-10">
+            <a href="/" class="inline-flex items-center gap-2 text-xs font-semibold text-white/80 hover:text-white transition px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 backdrop-blur-xs">
+                <i class="fa-solid fa-arrow-left text-[10px]"></i>
+                <span>Back to Overview</span>
+            </a>
+        </div>
+
+        <!-- Center Brand Emblem & Healthcare Mission -->
+        <div class="my-auto py-8 z-10 max-w-md mx-auto space-y-4">
+            <!-- CareLink Medical Emblem (Authentic Brand Colors) -->
+            <div class="flex justify-center">
+                <div class="w-24 h-24 sm:w-28 sm:h-28 bg-white/95 rounded-3xl p-3.5 shadow-2xl shadow-teal-950/40 border border-white/60 flex items-center justify-center hover:scale-105 transition-transform duration-300">
+                    <img src="/static/img/carelink-logo.png" alt="CareLink Logo" class="w-full h-full object-contain">
+                </div>
+            </div>
+
+            <!-- Brand Name -->
+            <h1 class="text-4xl sm:text-5xl font-black tracking-tight text-white drop-shadow-sm">
+                CareLink
+            </h1>
+
+            <!-- Subtitle connected to hospital referral & capacity idea -->
+            <p class="text-sm sm:text-base text-teal-100 font-normal leading-relaxed max-w-sm mx-auto">
+                Inter-Hospital Patient Referral & Capacity Management System
+            </p>
+
+            <!-- ECG Pulse Line (replaces generic dot with medical telemetry line) -->
+            <div class="w-44 mx-auto pt-2">
+                <svg class="w-full h-7 text-teal-300/70" viewBox="0 0 180 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M0 15 H60 L68 4 L76 26 L84 8 L92 20 L100 15 H180" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Bottom 3 Circular Feature Icons (Specific to hospital transfer workflows) -->
+        <div class="w-full max-w-md mx-auto z-10 pt-4 pb-2">
+            <div class="flex items-center justify-center gap-8 sm:gap-14 text-center">
+                <!-- Feature 1: Bed Tracking -->
+                <div class="flex flex-col items-center">
+                    <div class="w-12 h-12 rounded-full bg-white/10 border border-teal-300/30 flex items-center justify-center text-teal-200 text-base shadow-sm mb-2 backdrop-blur-xs">
+                        <i class="fa-solid fa-bed-pulse"></i>
+                    </div>
+                    <span class="text-xs font-semibold text-teal-100">Bed Tracking</span>
+                </div>
+
+                <!-- Feature 2: EMS Dispatch -->
+                <div class="flex flex-col items-center">
+                    <div class="w-12 h-12 rounded-full bg-white/10 border border-teal-300/30 flex items-center justify-center text-teal-200 text-base shadow-sm mb-2 backdrop-blur-xs">
+                        <i class="fa-solid fa-truck-medical"></i>
+                    </div>
+                    <span class="text-xs font-semibold text-teal-100">EMS Dispatch</span>
+                </div>
+
+                <!-- Feature 3: Patient Triage -->
+                <div class="flex flex-col items-center">
+                    <div class="w-12 h-12 rounded-full bg-white/10 border border-teal-300/30 flex items-center justify-center text-teal-200 text-base shadow-sm mb-2 backdrop-blur-xs">
+                        <i class="fa-solid fa-route"></i>
+                    </div>
+                    <span class="text-xs font-semibold text-teal-100">Patient Triage</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom ECG Telemetry Waveform (Healthcare vital signs monitor line) -->
+        <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none pointer-events-none opacity-20">
+            <svg class="w-full h-16 text-teal-200" viewBox="0 0 1200 80" fill="none" preserveAspectRatio="none">
+                <path d="M0,40 L280,40 L300,12 L320,68 L340,22 L360,56 L380,40 L780,40 L800,10 L820,70 L840,20 L860,58 L880,40 L1200,40" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- RIGHT SIDE: Centered Floating Card (Original Teal & Slate Palette) -->
+    <div class="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-10 lg:p-16">
+        <div class="w-full max-w-md bg-white rounded-3xl shadow-xl border border-slate-100 p-8 sm:p-10 space-y-6">
+            
+            <!-- Card Header -->
+            <div class="space-y-1">
+                <div class="lg:hidden flex items-center gap-2.5 pb-2">
+                    <img src="/static/img/carelink-logo.png" alt="CareLink Logo" class="h-8 w-auto object-contain">
+                    <span class="text-xl font-black tracking-tight text-slate-900">Care<span class="text-teal-600">Link</span></span>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                    Sign in to System
+                </h2>
+                <p class="text-xs sm:text-sm text-slate-500">
+                    Enter your credentials to continue
+                </p>
+            </div>
+
+            <!-- Login Form -->
+            <form id="login-form" onsubmit="submitLoginForm(event)" class="space-y-4">
+                <!-- Email -->
+                <div>
+                    <label for="login-email" class="block text-xs font-semibold text-slate-700 mb-1.5">Email</label>
+                    <div class="relative">
+                        <i class="fa-regular fa-envelope absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+                        <input id="login-email" type="email" required placeholder="your@email.com" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none transition">
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div>
+                    <label for="login-password" class="block text-xs font-semibold text-slate-700 mb-1.5">Password</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-lock absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+                        <input id="login-password" type="password" required placeholder="Enter your password" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none transition">
+                    </div>
+                </div>
+
+                <!-- Forgot Password -->
+                <div class="flex justify-end">
+                    <button type="button" onclick="openForgotPasswordModal()" class="text-xs font-semibold text-teal-600 hover:text-teal-700 hover:underline cursor-pointer bg-transparent border-none p-0">
+                        Forgot Password?
+                    </button>
+                </div>
+
+                <!-- Error Container -->
+                <div id="login-error" class="hidden p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 font-semibold"></div>
+
+                <!-- Sign In Action Button (CareLink Slate/Teal Palette) -->
+                <button type="submit" id="login-btn" class="w-full py-3.5 px-4 rounded-xl font-bold text-sm text-white bg-slate-900 hover:bg-teal-600 shadow-md transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer">
+                    <span>Sign In</span>
+                    <i class="fa-solid fa-arrow-right text-xs"></i>
+                </button>
+            </form>
+
+            <!-- OR CONTINUE WITH Divider -->
+            <div class="relative flex py-1 items-center">
+                <div class="flex-grow border-t border-slate-200"></div>
+                <span class="flex-shrink mx-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Or Quick Demo Login</span>
+                <div class="flex-grow border-t border-slate-200"></div>
+            </div>
+
+            <!-- Quick Demo 1-Click Role Logins -->
+            <div class="grid grid-cols-2 gap-2 text-xs">
+                <button onclick="quickLogin('admin@carelink.local', 'AdminPass123!')" class="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-left transition flex items-center gap-2 cursor-pointer">
+                    <div class="w-7 h-7 rounded-lg bg-slate-200/70 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-shield-halved text-slate-700 text-xs"></i>
+                    </div>
+                    <div>
+                        <p class="font-bold text-slate-800 text-[11px] leading-tight">Admin</p>
+                        <p class="text-[9px] text-slate-400">System Ops</p>
+                    </div>
+                </button>
+                <button onclick="quickLogin('coordinator@carelink.local', 'CoordPass123!')" class="p-2.5 rounded-xl bg-slate-50 hover:bg-amber-50/60 border border-slate-200 hover:border-amber-200 text-left transition flex items-center gap-2 cursor-pointer">
+                    <div class="w-7 h-7 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-satellite-dish text-amber-600 text-xs"></i>
+                    </div>
+                    <div>
+                        <p class="font-bold text-slate-800 text-[11px] leading-tight">Coordinator</p>
+                        <p class="text-[9px] text-slate-400">Triage & Route</p>
+                    </div>
+                </button>
+                <button onclick="quickLogin('dispatcher@carelink.local', 'DispatchPass123!')" class="p-2.5 rounded-xl bg-slate-50 hover:bg-rose-50/60 border border-slate-200 hover:border-rose-200 text-left transition flex items-center gap-2 cursor-pointer">
+                    <div class="w-7 h-7 rounded-lg bg-rose-100 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-truck-medical text-rose-600 text-xs"></i>
+                    </div>
+                    <div>
+                        <p class="font-bold text-slate-800 text-[11px] leading-tight">Dispatcher</p>
+                        <p class="text-[9px] text-slate-400">Ambulance</p>
+                    </div>
+                </button>
+                <button onclick="quickLogin('staff.bpmc@carelink.local', 'StaffPass123!')" class="p-2.5 rounded-xl bg-slate-50 hover:bg-emerald-50/60 border border-slate-200 hover:border-emerald-200 text-left transition flex items-center gap-2 cursor-pointer">
+                    <div class="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-hospital text-emerald-600 text-xs"></i>
+                    </div>
+                    <div>
+                        <p class="font-bold text-slate-800 text-[11px] leading-tight">Hospital Staff</p>
+                        <p class="text-[9px] text-slate-400">Clinical Team</p>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Footer: Register Now & Admin Portal -->
+            <div class="pt-2 text-center space-y-2">
+                <p class="text-xs text-slate-500 font-medium">
+                    Don't have an account? <a href="/register-hospital/" class="text-teal-600 font-bold hover:underline">Register now</a>
+                </p>
+                <div>
+                    <a href="/admin-dashboard/" class="text-xs font-semibold text-slate-400 hover:text-slate-700 transition">Admin Portal</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+<!-- Forgot Password Modal -->
+<!-- Secure 2-Step Forgot Password Modal with OTP Verification -->
+<div id="forgot-password-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-100 space-y-5 animate-in fade-in zoom-in duration-150">
+        <div class="flex justify-between items-start">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-teal-50 border border-teal-200 text-teal-600 flex items-center justify-center font-bold">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <div>
+                    <h3 class="font-black text-slate-900 text-lg">Secure Password Reset</h3>
+                    <p class="text-xs text-slate-500" id="forgot-modal-subtitle">Verify account ownership with a one-time security code</p>
+                </div>
+            </div>
+            <button onclick="closeForgotPasswordModal()" class="w-8 h-8 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center cursor-pointer transition">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+        </div>
+
+        <!-- Step 1: Request Security Code -->
+        <div id="forgot-step-1" class="space-y-4 text-xs">
+            <div>
+                <label class="block font-bold text-slate-700 mb-1">Account Email *</label>
+                <div class="relative">
+                    <i class="fa-regular fa-envelope absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+                    <input id="forgot-email" type="email" required placeholder="name@hospital.local" class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-teal-500 focus:outline-none">
+                </div>
+                <p class="text-[11px] text-slate-400 mt-1">A 6-digit one-time authorization code will be generated for verification.</p>
+            </div>
+
+            <div id="forgot-step1-error" class="hidden p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 font-semibold"></div>
+
+            <div class="flex justify-end gap-2.5 pt-2">
+                <button type="button" onclick="closeForgotPasswordModal()" class="px-4 py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition cursor-pointer">
+                    Cancel
+                </button>
+                <button type="button" id="btn-send-code" onclick="sendPasswordResetCode()" class="px-5 py-2.5 rounded-xl font-bold text-white bg-teal-600 hover:bg-teal-700 shadow-sm transition cursor-pointer flex items-center gap-1.5">
+                    <i class="fa-solid fa-paper-plane"></i> Send Security Code
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 2: Enter Code & New Password -->
+        <form id="forgot-step-2" onsubmit="submitVerifiedPasswordReset(event)" class="space-y-4 text-xs hidden">
+            <!-- Simulated Code Banner -->
+            <div id="forgot-code-banner" class="p-3 rounded-2xl bg-teal-50 border border-teal-200 text-teal-900 space-y-1">
+                <div class="flex items-center gap-1.5 font-bold text-[11px] text-teal-800">
+                    <i class="fa-solid fa-circle-check text-teal-600"></i>
+                    <span>Verification Code Dispatched</span>
+                </div>
+                <p class="text-[11px] text-teal-700">Check your email or use the generated security code below:</p>
+                <div class="pt-1 flex items-center gap-2">
+                    <span class="text-[10px] uppercase font-bold text-slate-500">Security Code:</span>
+                    <span id="demo-code-display" class="font-mono font-black text-sm text-teal-800 bg-white px-2 py-0.5 rounded-md border border-teal-200 select-all tracking-widest">------</span>
+                </div>
+            </div>
+
+            <div>
+                <label class="block font-bold text-slate-700 mb-1">Enter 6-Digit Security Code *</label>
+                <div class="relative">
+                    <i class="fa-solid fa-key absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+                    <input id="forgot-otp" type="text" maxlength="6" required placeholder="123456" class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-300 text-sm font-mono tracking-widest text-center font-bold focus:ring-2 focus:ring-teal-500 focus:outline-none">
+                </div>
+            </div>
+
+            <div>
+                <label class="block font-bold text-slate-700 mb-1">New Password (min. 6 characters) *</label>
+                <div class="relative">
+                    <i class="fa-solid fa-lock absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+                    <input id="forgot-new-pwd" type="password" required minlength="6" placeholder="••••••••" class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-teal-500 focus:outline-none">
+                </div>
+            </div>
+
+            <div>
+                <label class="block font-bold text-slate-700 mb-1">Confirm New Password *</label>
+                <div class="relative">
+                    <i class="fa-solid fa-check absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+                    <input id="forgot-confirm-pwd" type="password" required minlength="6" placeholder="••••••••" class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-teal-500 focus:outline-none">
+                </div>
+            </div>
+
+            <div id="forgot-step2-error" class="hidden p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 font-semibold"></div>
+
+            <div class="flex justify-between items-center pt-2">
+                <button type="button" onclick="goToForgotStep1()" class="text-xs text-slate-500 hover:text-teal-600 font-semibold">
+                    &larr; Re-enter email
+                </button>
+                <button type="submit" id="btn-submit-reset" class="px-5 py-2.5 rounded-xl font-bold text-white bg-teal-600 hover:bg-teal-700 shadow-sm transition cursor-pointer flex items-center gap-1.5">
+                    <i class="fa-solid fa-lock"></i> Set New Password
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+</div>
+{% endblock %}

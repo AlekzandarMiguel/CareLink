@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Audit Trail — CareLink{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-5">
+        <div>
+            <span class="text-xs font-bold text-amber-600 uppercase tracking-wider">Security & Governance</span>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-0.5">System Audit Trail</h1>
+            <p class="text-xs text-slate-500 mt-1">Immutable activity ledger tracking user operations, clinical decisions, and access events</p>
+        </div>
+        <button onclick="refreshAdminAudit(this)" class="px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition shadow-sm flex items-center gap-1.5 cursor-pointer">
+            <i class="fa-solid fa-rotate text-primary-600"></i> Refresh Logs
+        </button>
+    </div>
+
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-4 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+            <h3 class="font-bold text-slate-900 text-sm"><i class="fa-solid fa-shield-halved text-amber-600 mr-2"></i> Security Event Stream</h3>
+            <span class="text-xs text-slate-500 font-mono">SOC-2 / HIPAA Compliant Logs</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 text-slate-600 uppercase font-semibold border-b border-slate-100">
+                    <tr>
+                        <th class="px-6 py-3.5">Timestamp</th>
+                        <th class="px-6 py-3.5">User</th>
+                        <th class="px-6 py-3.5">Action</th>
+                        <th class="px-6 py-3.5">Resource</th>
+                        <th class="px-6 py-3.5">Details</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-audit-tbody" class="divide-y divide-slate-100">
+                    <tr><td colspan="5" class="px-6 py-8 text-center text-slate-400">Loading audit trail...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        requireRole('ADMIN');
+        loadAdminDashboardData();
+    });
+</script>
+{% endblock %}

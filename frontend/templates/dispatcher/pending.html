@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% block title %}Pending Unit Assignments — CareLink{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-5">
+        <div>
+            <span class="text-xs font-bold text-amber-600 uppercase tracking-wider">Unit Dispatch Queue</span>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-0.5">Pending Ambulance Assignments</h1>
+            <p class="text-xs text-slate-500 mt-1">Approved patient transfers requiring vehicle and paramedic assignment</p>
+        </div>
+        <button onclick="refreshDispatcherPending(this)" class="px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition shadow-sm flex items-center gap-1.5 cursor-pointer">
+            <i class="fa-solid fa-rotate text-primary-600"></i> Refresh Queue
+        </button>
+    </div>
+
+    <!-- Active Transfers Table -->
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+            <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                <i class="fa-solid fa-clock text-amber-600"></i> Transfers Awaiting Unit Assignment
+            </h3>
+            <span class="text-xs text-slate-500">Immediate action required</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 text-slate-600 text-xs uppercase font-semibold border-b border-slate-100">
+                    <tr>
+                        <th class="px-6 py-3.5">Referral / Patient</th>
+                        <th class="px-6 py-3.5">Route</th>
+                        <th class="px-6 py-3.5">Urgency</th>
+                        <th class="px-6 py-3.5">Vehicle / Driver</th>
+                        <th class="px-6 py-3.5">Current Status</th>
+                        <th class="px-6 py-3.5 text-right">Assign Unit</th>
+                    </tr>
+                </thead>
+                <tbody id="dispatcher-transfers-tbody" class="divide-y divide-slate-100">
+                    <tr><td colspan="6" class="px-6 py-8 text-center text-slate-400">Loading pending transfers...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Vehicle Assignment Modal -->
+<div id="assign-vehicle-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-5 shadow-2xl border border-slate-200">
+        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+            <h3 class="text-lg font-bold text-slate-900">Assign Ambulance & Driver</h3>
+            <button onclick="closeAssignModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form id="assign-vehicle-form" onsubmit="submitVehicleAssignment(event)" class="space-y-4">
+            <input type="hidden" id="assign-transfer-id">
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Vehicle / Ambulance Number *</label>
+                <input id="assign-vehicle-num" type="text" required placeholder="e.g. AMB-ALS-104" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Vehicle Type</label>
+                <select id="assign-vehicle-type" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                    <option value="Advanced Life Support (ALS) Ambulance">Advanced Life Support (ALS) Ambulance</option>
+                    <option value="Basic Life Support (BLS) Ambulance">Basic Life Support (BLS) Ambulance</option>
+                    <option value="Mobile ICU Unit">Mobile ICU Unit</option>
+                    <option value="Neonatal Transport Unit">Neonatal Transport Unit</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Driver Name *</label>
+                <input id="assign-driver-name" type="text" required placeholder="Officer Michael Scott" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Paramedic / Escort Name</label>
+                <input id="assign-paramedic-name" type="text" placeholder="Paramedic Lisa Kudrow" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none">
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button type="button" onclick="closeAssignModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200">Cancel</button>
+                <button type="submit" class="px-5 py-2 rounded-xl text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 shadow-md">Confirm Assignment</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Transfer Detail Modal -->
+<div id="transfer-detail-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 p-6 sm:p-8">
+        <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
+            <div>
+                <h2 class="text-xl font-bold text-slate-900">Transfer Details</h2>
+                <p id="td-referral-code" class="text-sm font-mono text-primary-600 font-bold"></p>
+            </div>
+            <button onclick="closeTransferDetailModal()" class="text-slate-400 hover:text-slate-600 text-xl"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Left Column -->
+            <div class="space-y-6">
+                <div>
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Patient Information</h3>
+                    <p id="td-patient-name" class="font-bold text-slate-900 text-lg"></p>
+                    <p id="td-urgency" class="inline-block mt-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100"></p>
+                </div>
+
+                <div>
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Route</h3>
+                    <div class="p-3 bg-slate-50 rounded-xl space-y-2 border border-slate-100">
+                        <div>
+                            <p class="text-[10px] font-bold text-slate-500 uppercase">From</p>
+                            <p id="td-from-hosp" class="text-sm font-semibold text-slate-800"></p>
+                        </div>
+                        <div class="border-l-2 border-dashed border-slate-300 ml-2 pl-2 py-1">
+                            <i class="fa-solid fa-arrow-down text-slate-400 text-xs"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold text-slate-500 uppercase">To</p>
+                            <p id="td-to-hosp" class="text-sm font-semibold text-slate-800"></p>
+                        </div>
+                    </div>
+                </div>
+{% endblock %}
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        requireRole('DISPATCHER');
+        loadDispatcherDashboardData().then(() => {
+            filterDispatcherTransfers('TRANSFER_PENDING');
+        });
+    });
+</script>
+{% endblock %}
