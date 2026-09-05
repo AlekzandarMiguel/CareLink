@@ -1,0 +1,27 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*.class
+*.so
+
+# Virtual Environments
+venv/
+env/
+.venv/
+ENV/
+
+# Scratch helper scripts
+original_prompt.txt
+file_writer.py
+update_detail.py
+update_dispatcher.py
+
+# Logs and secrets
+*.log
+.env
+
+# IDE and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
