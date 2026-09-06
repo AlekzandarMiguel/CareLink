@@ -576,9 +576,9 @@ async function loadAdminDashboardData() {
                                 <span class="text-slate-400 block text-[10px]">${h.available_icu_beds || 0} ICU</span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold tracking-wide ${h.verification_status === 'APPROVED' ? 'bg-teal-50 text-teal-700 border border-teal-200/80' : (h.verification_status === 'PENDING' ? 'bg-amber-50 text-amber-700 border border-amber-200/80' : 'bg-rose-50 text-rose-700 border border-rose-200/80')}">
-                                    <span class="w-1.5 h-1.5 rounded-full ${h.verification_status === 'APPROVED' ? 'bg-teal-500' : (h.verification_status === 'PENDING' ? 'bg-amber-500' : 'bg-rose-500')}"></span>
-                                    ${h.verification_status}
+                                <span class="inline-flex items-center gap-1.5 font-bold text-xs ${h.verification_status === 'APPROVED' ? 'text-teal-700' : (h.verification_status === 'PENDING' ? 'text-amber-700' : 'text-rose-600')}">
+                                    <span class="w-1.5 h-1.5 rounded-full ${h.verification_status === 'APPROVED' ? 'bg-teal-500' : (h.verification_status === 'PENDING' ? 'bg-amber-500' : 'bg-rose-500')} shrink-0"></span>
+                                    <span>${h.verification_status}</span>
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-right space-x-1.5 whitespace-nowrap">
